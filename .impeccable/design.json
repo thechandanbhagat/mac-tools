@@ -1,0 +1,857 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T12:29:06.263051Z",
+  "title": "Design System: Mac Tools",
+  "extensions": {
+    "colorMeta": {
+      "primary-light": {
+        "role": "primary",
+        "displayName": "Forest teal \u00b7 light appearance",
+        "tonalRamp": [
+          "oklch(15.00% 0.08040 173.988)",
+          "oklch(26.43% 0.08040 173.988)",
+          "oklch(37.86% 0.08040 173.988)",
+          "oklch(49.29% 0.08040 173.988)",
+          "oklch(60.71% 0.08040 173.988)",
+          "oklch(72.14% 0.08040 173.988)",
+          "oklch(83.57% 0.08040 173.988)",
+          "oklch(95.00% 0.08040 173.988)"
+        ],
+        "rampPurpose": "Synthetic panel-only OKLCH reference; not a shipping palette."
+      },
+      "primary-dark": {
+        "role": "primary",
+        "displayName": "Forest teal \u00b7 dark appearance",
+        "tonalRamp": [
+          "oklch(15.00% 0.10320 174.923)",
+          "oklch(26.43% 0.10320 174.923)",
+          "oklch(37.86% 0.10320 174.923)",
+          "oklch(49.29% 0.10320 174.923)",
+          "oklch(60.71% 0.10320 174.923)",
+          "oklch(72.14% 0.10320 174.923)",
+          "oklch(83.57% 0.10320 174.923)",
+          "oklch(95.00% 0.10320 174.923)"
+        ],
+        "rampPurpose": "Synthetic panel-only OKLCH reference; not a shipping palette."
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Main heading",
+        "purpose": "Main headings across the native tools."
+      },
+      "dialog-title": {
+        "displayName": "Dialog title",
+        "purpose": "Review and Settings headings."
+      },
+      "title": {
+        "displayName": "Section title",
+        "purpose": "Workflow section headings and app name."
+      },
+      "row-title": {
+        "displayName": "File name",
+        "purpose": "Filename, with secondary path beneath."
+      },
+      "label": {
+        "displayName": "Utility label",
+        "purpose": "Paths, filter labels, counts, and footer explanations."
+      },
+      "map-total": {
+        "displayName": "Current folder size",
+        "purpose": "Storage Map scanned-size total; monospaced digits."
+      },
+      "tile-label": {
+        "displayName": "Map tile name",
+        "purpose": "Semibold tile title when allocated bounds provide sufficient space."
+      },
+      "section-label": {
+        "displayName": "Scope heading",
+        "purpose": "Concise Scan locations heading in Cleaner."
+      },
+      "confirmation-title": {
+        "displayName": "Confirmation title",
+        "purpose": "Names the reviewed Trash or rename action and its file scope."
+      }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [],
+    "native": {
+      "platform": "macOS 14+, SwiftUI and AppKit",
+      "authority": "Sources/MacTools/UI/Theme.swift, AppShellView.swift, and each implemented tool view/model under Sources/MacTools/UI; Sources/MacTools/MacToolsApp.swift; DESIGN.md",
+      "units": "Native dimensions in DESIGN.md use logical macOS points. Browser previews use CSS pixels only as schematic translations.",
+      "previewLimitations": "HTML/CSS snippets satisfy the design-panel preview format. They are illustrative, have no application behavior, omit SF Symbols, and do not define native button geometry, focus rings, semantic colors, or hover behavior. SwiftUI source and DESIGN.md are authoritative.",
+      "appearance": {
+        "storage": "@AppStorage(\"appearance\")",
+        "values": [
+          "system",
+          "light",
+          "dark"
+        ],
+        "resolution": "System passes nil to preferredColorScheme; Light and Dark pass the corresponding scheme. Palette.accent resolves Aqua/Dark Aqua dynamically.",
+        "portableDefault": "Frontmatter component accent references show primary-light; native components use primary-dark automatically in dark appearance."
+      },
+      "semanticColors": {
+        "Palette.canvas": "NSColor.windowBackgroundColor",
+        "Palette.panel": "NSColor.controlBackgroundColor",
+        "Palette.line": "NSColor.separatorColor",
+        "primaryText": "SwiftUI .primary",
+        "secondaryText": "SwiftUI .secondary"
+      },
+      "accentOpacity": {
+        "navigationSelected": 0.1,
+        "filterSelected": 0.11,
+        "fileSelected": 0.045,
+        "notice": 0.07,
+        "meterTrack": 0.1,
+        "mapTileCycle": [
+          0.21,
+          0.188,
+          0.166,
+          0.144,
+          0.122,
+          0.1
+        ],
+        "mapOtherTile": 0.065,
+        "mapTileBorder": 0.16,
+        "appSelected": 0.12
+      },
+      "window": {
+        "defaultWidth": 1120,
+        "defaultHeight": 790,
+        "minWidth": 1000,
+        "minHeight": 720,
+        "sidebarWidth": 208,
+        "unit": "pt",
+        "titleBar": "hiddenTitleBar"
+      },
+      "symbolNames": {
+        "mark": "square.stack.3d.up.fill",
+        "cleaner": "internaldrive",
+        "caches": "shippingbox",
+        "logs": "doc.text",
+        "downloads": "arrow.down.circle",
+        "largeFiles": "doc.zipper",
+        "reveal": "arrow.up.forward.square",
+        "emptyResults": "folder",
+        "partialScan": "exclamationmark.circle",
+        "review": "trash",
+        "settings": "gearshape",
+        "storageMap": "square.grid.2x2",
+        "mapFolder": "folder",
+        "mapFile": "doc",
+        "mapPackage": "shippingbox",
+        "mapOther": "ellipsis",
+        "mapBack": "chevron.left",
+        "contextualHelp": "questionmark.circle",
+        "mapOptions": "slider.horizontal.3",
+        "mapRescan": "arrow.clockwise",
+        "uninstaller": "app.badge",
+        "uninstallerEmpty": "app.dashed",
+        "uninstallerRefresh": "arrow.clockwise",
+        "duplicates": "doc.on.doc",
+        "startup": "power",
+        "monitor": "waveform.path.ecg",
+        "renamer": "character.cursor.ibeam",
+        "clipboard": "clipboard",
+        "converter": "arrow.triangle.2.circlepath"
+      },
+      "components": [
+        {
+          "name": "Primary action",
+          "source": "Button { model.startScan() } label: { Label(\"Scan storage\", systemImage: \"magnifyingglass\") }\n.buttonStyle(.borderedProminent).controlSize(.large)\n.disabled(model.enabledCategories.isEmpty)",
+          "note": "The window applies .tint(Palette.accent). Native style owns layout and states."
+        },
+        {
+          "name": "Search field",
+          "source": "TextField(\"Filter by name or path\", text: $model.query).textFieldStyle(.plain)\n// The containing HStack applies:\n.padding(9).background(Palette.canvas, in: RoundedRectangle(cornerRadius: 6))"
+        },
+        {
+          "name": "Selected tool",
+          "source": "Button { selection = tool } label: {\n    HStack {\n        Label(tool.title, systemImage: tool.symbol)\n        Spacer(minLength: 4)\n        // A mini ProgressView appears while this tool is busy.\n    }\n    .font(.system(size: 14, weight: selection == tool ? .semibold : .regular))\n    .foregroundStyle(selection == tool ? Palette.accent : .primary)\n    .padding(.horizontal, 13).padding(.vertical, 12)\n    .contentShape(Rectangle())\n    .background(selection == tool ? Palette.accent.opacity(0.10) : .clear, in: RoundedRectangle(cornerRadius: 8))\n}\n.buttonStyle(.plain)\n.accessibilityAddTraits(selection == tool ? [.isSelected] : [])"
+        },
+        {
+          "name": "Selected category filter",
+          "source": ".font(.system(size: 11, weight: model.filter == category ? .semibold : .regular))\n.padding(.horizontal, 10).padding(.vertical, 8)\n.background(model.filter == category ? Palette.accent.opacity(0.11) : .clear, in: RoundedRectangle(cornerRadius: 6))\n.foregroundStyle(model.filter == category ? Palette.accent : .primary)"
+        },
+        {
+          "name": "Disk overview",
+          "source": ".padding(22)\n.background(Palette.canvas.opacity(0.7), in: RoundedRectangle(cornerRadius: 12))",
+          "meterSource": "RoundedRectangle(cornerRadius: 5).fill(Palette.accent.opacity(0.10))\nRoundedRectangle(cornerRadius: 5).fill(Palette.accent).frame(width: max(0, geometry.size.width * disk.fraction))\n// GeometryReader has .frame(height: 13)"
+        },
+        {
+          "name": "Storage Map tile",
+          "refersTo": "storage-map-tile",
+          "source": ".padding(roomForName ? 12 : 0)\n.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)\n.background(Palette.accent.opacity(segment.node == nil ? 0.065 : 0.21 - Double(tile.index % 6) * 0.022))\n.overlay { RoundedRectangle(cornerRadius: 5).strokeBorder(Palette.accent.opacity(0.16), lineWidth: 1) }\n.clipShape(RoundedRectangle(cornerRadius: 5))\n.contentShape(Rectangle())",
+          "note": "Contained in a plain native button. Folder activation opens and scans the folder; files/packages reveal in Finder. Tooltip, accessibility name, byte value, and action hint remain when visible text is omitted."
+        },
+        {
+          "name": "Storage Map location toolbar",
+          "source": "HStack(spacing: 12) {\n    breadcrumbs\n    Menu {\n        Toggle(\"Include hidden items\", isOn: $model.includeHidden)\n            .help(\"Rescan the current folder with or without hidden items.\")\n    } label: { Image(systemName: \"slider.horizontal.3\") }\n    .fixedSize().menuStyle(.borderlessButton).menuIndicator(.hidden)\n    .help(\"Scan options\").accessibilityLabel(\"Scan options\")\n    Button(\"Choose folder\u2026\") { model.chooseFolder() }\n        .disabled(model.isScanning || model.isDemo)\n}",
+          "note": "Current location appears once. No filled card or duplicate folder heading; toolbar remains present while scanning."
+        },
+        {
+          "name": "Storage Map breadcrumbs",
+          "source": "Button { model.goBack() } label: { Image(systemName: \"chevron.left\") }\n.disabled(model.breadcrumbs.count < 2)\n.help(\"Go to the parent folder and scan it\")\n.accessibilityLabel(\"Go to the parent folder\")\n.keyboardShortcut(\"[\", modifiers: .command)\n// Horizontally scrolling native link buttons scan ancestors.\n// Current crumb is non-interactive 13pt semibold text; ancestors use 12pt native links.\n// ScrollViewReader scrolls to the current crumb on appearance and navigation changes.\n// A separate current-folder Finder reveal remains available during scanning."
+        },
+        {
+          "name": "Contextual help",
+          "refersTo": "help-control",
+          "source": "Button { isPresented.toggle() } label: {\n    Image(systemName: \"questionmark.circle\")\n        .font(.system(size: 15))\n        .foregroundStyle(.secondary)\n        .frame(width: 22, height: 22)\n        .contentShape(Rectangle())\n}\n.buttonStyle(.plain)\n.help(text)\n.accessibilityLabel(label)\n.accessibilityHint(text)\n.popover(isPresented: $isPresented) {\n    Text(text).font(.system(size: 13))\n        .fixedSize(horizontal: false, vertical: true)\n        .textSelection(.enabled)\n        .padding(18)\n        .frame(width: 320, alignment: .leading)\n}"
+        },
+        {
+          "name": "Storage Map item confirmation",
+          "refersTo": "storage-map-trash-confirmation",
+          "source": "VStack(alignment: .leading, spacing: 18) {\n    // Item-specific question, full path, allocated size, and restoration sentence.\n    // Folders also state that all contents, including hidden items, move with them.\n    HStack {\n        Spacer()\n        Button(\"Cancel\", role: .cancel, action: onCancel)\n            .keyboardShortcut(.defaultAction)\n        Button(\"Move to Trash\", role: .destructive, action: onConfirm)\n            .buttonStyle(.borderedProminent).disabled(isDemo)\n    }\n}\n.padding(26).frame(width: 470)\n.onExitCommand(perform: onCancel)",
+          "sourceFile": "Sources/MacTools/UI/StorageMapTrashConfirmation.swift"
+        },
+        {
+          "name": "Uninstaller app list",
+          "sourceFile": "Sources/MacTools/UI/AppUninstallerView.swift",
+          "source": "applicationList.frame(width: 260)\n// HStack uses spacing: 24 and a native Divider; outer horizontal inset is 36pt.\n// Row: AppIcon 32\u00d732pt, 13pt medium name, 11pt version, padding 9pt.\n.background(isSelected ? Palette.accent.opacity(0.12) : .clear, in: RoundedRectangle(cornerRadius: 8))",
+          "note": "Plain native buttons retain accessible selected state; the list and detail pane scroll independently."
+        },
+        {
+          "name": "Uninstaller confirmation",
+          "refersTo": "uninstaller-confirmation",
+          "sourceFile": "Sources/MacTools/UI/AppUninstallerView.swift",
+          "source": "VStack(alignment: .leading, spacing: 18) {\n    // App-specific question, removal consequence, scrolling item paths and sizes.\n    // ScrollView has frame(maxHeight: 220).\n    // Cancel uses the default Return action; Move to Trash is destructive and disabled in demo.\n}\n.padding(26).frame(width: 560)\n.onExitCommand(perform: onCancel)"
+        }
+      ],
+      "tools": {
+        "order": [
+          "Cleaner",
+          "Storage Map",
+          "Uninstaller",
+          "Duplicate Finder",
+          "Startup Manager",
+          "System Monitor",
+          "Batch Renamer",
+          "Clipboard History",
+          "File Converter"
+        ],
+        "modelLifetime": "Models are held at the app level and retain their state when the selected tool changes.",
+        "activeState": "Semibold accent text, 10% accent fill, and accessibility selected trait; inactive tool uses regular primary text.",
+        "busyState": "Mini native ProgressView for finite scan and file-operation work. Continuous monitor sampling and clipboard recording do not add sidebar spinners.",
+        "shortcuts": {
+          "Command-1": "Cleaner",
+          "Command-2": "Storage Map",
+          "Command-R": "Scan or refresh the selected tool; File Converter opens Add files, Clipboard History is disabled.",
+          "Command-Return": "Open an available Cleaner, Uninstaller, Duplicate Finder, or Batch Renamer review.",
+          "Command-[": "Go to the parent folder in Storage Map and scan it.",
+          "Command-3": "Uninstaller",
+          "Command-4": "Duplicate Finder",
+          "Command-5": "Startup Manager",
+          "Command-6": "System Monitor",
+          "Command-7": "Batch Renamer",
+          "Command-8": "Clipboard History",
+          "Command-9": "File Converter"
+        },
+        "navigation": "Tool buttons scroll within the existing 208pt sidebar; Settings remains below the tool list."
+      },
+      "storageMap": {
+        "evidence": "Source inspection plus historical folderFlowReview and file-only mapTrash runtimeReview. Current folder Trash and Uninstaller verification is tracked in folderTrashUninstallerReview; historical captures do not represent newly added controls.",
+        "sourceFiles": [
+          "Sources/MacTools/UI/StorageMapView.swift",
+          "Sources/MacTools/UI/StorageMapChart.swift",
+          "Sources/MacTools/UI/AppShellView.swift",
+          "Sources/MacTools/UI/StorageMapModel.swift"
+        ],
+        "layout": {
+          "unit": "pt",
+          "sectionGap": 24,
+          "chartHeight": 206,
+          "tileGutter": 4,
+          "tileCornerRadiusToken": "rounded.meter",
+          "tileBorderWidth": 1,
+          "tileLabelPadding": 12,
+          "nameMinimum": {
+            "width": 85,
+            "height": 40
+          },
+          "sizeMinimum": {
+            "width": 100,
+            "height": 73
+          },
+          "symbolMinimumWidth": 145,
+          "rowSizeWidth": 94,
+          "rowPercentageWidth": 72,
+          "rowRevealWidth": 20,
+          "fullScopePadding": 20,
+          "locationToolbarGap": 12,
+          "progressGroupGap": 10
+        },
+        "chart": "Binary partition of positive-byte children. Show all through 12; above 12, show the largest 11 and sum remaining positive children into Other items. Partition area follows byte weights; gutters reduce the visible fill area.",
+        "otherAction": "Scroll to the complete size-sorted child list.",
+        "navigation": "Breadcrumb location is independent of scan results. Opening a child folder or ancestor starts a fresh scan at that destination. Back works during scanning. Files and packages reveal in Finder; packages remain non-drillable. Manual Rescan and Command-R scan the current folder without resetting the trail. Current crumb is non-interactive 13pt semibold text; ancestors are 12pt links. The horizontal breadcrumb scroll view keeps the current location visible.",
+        "scope": "Initial scope shows folder choice, Home and Downloads, and Include hidden items enabled by default. Once a location is active, one unfilled breadcrumb toolbar contains current-folder Finder reveal, an icon-only Scan options menu, and Choose folder. Changing hidden-items clears incompatible results and timestamp, then automatically rescans the current folder. Choose folder is disabled during scanning; ancestor navigation and options remain available.",
+        "attribution": "Each folder scan receives a fresh entry/depth allowance and new hard-link attribution. Hard links counted elsewhere in that scan carry an explicit label; folders show shared-entry counts. Independently scanned totals can differ from the earlier parent result and are not merged into that snapshot. A zero current total uses a text explanation instead of a chart.",
+        "partialStates": "Visible Partial scan label, partial row detail, and notice banner. Issue messages and paths remain visible in the notice sheet; contextual help explains that partial sizes include only inspected files. Empty partial states use exclamationmark.circle; complete empty states use folder.",
+        "percentage": "One decimal, <0.1% for positive shares below 0.1%, em dash when the current total is zero.",
+        "copy": "No page subtitle, duplicate root/current-folder heading, chart caption, repeated scan reassurance, or generic item-type detail. Header has a compact Demo label only in demo mode. Rows show extra detail only for shared entries or partial scans. Footer retains the last completed scan time and uses Scan folder or Rescan.",
+        "help": "Header HelpTip explains automatic folder scanning and manual current-folder refresh and the confirmed file or folder context action. Size HelpTip explains independent hard-link attribution. Scan options has a tooltip and accessibility label; folder row/tile help says Open and scan. Progress indicator tooltip carries the current path.",
+        "refreshState": "An ordinary manual refresh of the same current folder with unchanged options keeps its previous snapshot and timestamp visible. Cancellation or failure preserves them when available. Entering another folder or changing scan options clears old results and timestamp before scanning. The current breadcrumb location remains after cancellation or failure.",
+        "scanSemantics": "Scanning reads metadata only and never removes files. A separate confirmed context-menu action can move one eligible ordinary file or folder to macOS Trash."
+      },
+      "copyPolicy": {
+        "source": "Explicit user preference, persisted in AGENTS.md and PRODUCT.md.",
+        "principle": "Keep the interface clean and simple. Retain concise necessary action, field, navigation, and data labels; avoid slogans, redundant explanations, and repeated reassurance.",
+        "secondaryHelp": "Use contextual native help or a questionmark.circle button where useful. Provide hover information and accessible keyboard/click access.",
+        "essentialVisibility": "Errors, partial results, and destructive consequences remain visible when needed for decisions.",
+        "restraint": "Remove unnecessary copy before adding containers, badges, or help icons."
+      },
+      "help": {
+        "type": "HelpTip",
+        "source": "Sources/MacTools/UI/Theme.swift",
+        "symbol": "questionmark.circle",
+        "symbolSize": 15,
+        "controlWidth": 22,
+        "controlHeight": 22,
+        "popoverWidth": 320,
+        "popoverPadding": 18,
+        "unit": "pt",
+        "color": "SwiftUI .secondary",
+        "style": "Native plain button",
+        "behavior": "Native .help hover tooltip; meaningful accessibility label and text hint; native keyboard/click activation opens a popover with selectable body text.",
+        "evidence": "The click-open help popover was exercised and captured. Tooltip content was present in the accessibility tree; dwell-hover and keyboard activation were not exercised."
+      },
+      "cleanerCopy": "Header title and contextual help; Scan locations heading with category names and contextual description/path help; concise Scanning\u2026 state; Files to review result heading; footer selection total and actions. Essential notices and Trash consequences remain visible.",
+      "settingsCopy": "Settings title, appearance segmented picker, version, Done, and contextual About Mac Tools help.",
+      "runtimeReview": {
+        "appearance": "dark",
+        "window": {
+          "width": 2048,
+          "height": 1234,
+          "scope": "Persisted main preview window; no fresh default-size, compact-size, or minimum-width visual verification."
+        },
+        "captures": [
+          {
+            "path": ".impeccable/review/storage-map-results.png",
+            "observed": "Storage Map results: 13.9 MB across 7 items."
+          },
+          {
+            "path": ".impeccable/review/storage-map-detail.png",
+            "observed": "Projects folder drilldown: 4.8 MB across 2 children."
+          },
+          {
+            "path": ".impeccable/review/clean-ui-ready.png",
+            "observed": "Simplified Cleaner ready state."
+          },
+          {
+            "path": ".impeccable/review/clean-ui-help.png",
+            "observed": "Contextual help opened by click."
+          },
+          {
+            "path": ".impeccable/review/clean-ui-review.png",
+            "observed": "Review of the exact single selected sample file."
+          },
+          {
+            "path": ".impeccable/review/clean-ui-settings.png",
+            "observed": "Simplified Settings."
+          }
+        ],
+        "observedInteractions": [
+          "Command-1 and Command-2 switch tools while retaining Storage Map Projects navigation state.",
+          "Command-R scans Cleaner sample files and returns 7 files with zero selection.",
+          "After selecting one file, Command-Return opens review for that exact file.",
+          "Settings opens and contextual help opens by click."
+        ],
+        "unverified": [
+          "Fresh compact/default/minimum-width visual appearance.",
+          "Dwell-hover tooltip behavior.",
+          "Keyboard activation of HelpTip.",
+          "Light appearance in this review pass."
+        ],
+        "automatedTests": {
+          "passing": 36,
+          "scope": "Project tests reported passing during this review; no claim that these cover every visual or accessibility behavior."
+        },
+        "sourceOnlyAfterCapture": "The zero-total message was subsequently changed to No scanned storage to map. That wording is source-verified and was not visually captured.",
+        "reviewedAt": "2026-10-15",
+        "status": "Historical review of the earlier snapshot-navigation implementation; not verification of the 2026-10-17 independent folder-scan flow."
+      },
+      "folderFlowReview": {
+        "reviewedAt": "2026-10-17",
+        "appearance": "dark",
+        "window": {
+          "width": 1120,
+          "height": 790,
+          "scope": "Default-size preview window."
+        },
+        "captures": [
+          {
+            "path": ".impeccable/review/folder-flow-auto-scan.png",
+            "observed": "After a 13.9 MB root snapshot, a 1 MB file was added to Projects. Opening its tile automatically scanned Projects and showed 5.8 MB across 3 items."
+          },
+          {
+            "path": ".impeccable/review/folder-flow-manual-scan.png",
+            "observed": "After a further 2 MB file was added, the Rescan button showed 7.8 MB across 4 items while retaining Projects as the current location."
+          },
+          {
+            "path": ".impeccable/review/folder-flow-back.png",
+            "observed": "Command-[ returned to and automatically rescanned the root, showing 16.9 MB across 7 items, with Projects at 7.8 MB."
+          }
+        ],
+        "scope": "Native demo UI, with disposable sample files changed after earlier scans to verify fresh filesystem results.",
+        "automatedTests": {
+          "passing": 45,
+          "scope": "Project tests reported passing; this is separate from the three runtime scenarios above."
+        },
+        "unverified": [
+          "Light appearance in this review pass.",
+          "Minimum-width layout in this review pass.",
+          "VoiceOver behavior."
+        ],
+        "postCaptureChanges": "The final preview confirmed the two post-capture source adjustments through the accessibility tree: initial Scan help reads \u201cScan sample files (Command-R)\u201d, and the menu accessibility title remains \u201cScan options\u201d after entering Projects. A fresh sample scan then navigation showed Projects at 4.8 MB across 2 items. No further visual changes were made.",
+        "releaseVerification": "Optimized release build and strict signature verification passed.",
+        "sampleLifecycle": "Final checks used disposable demo files only. The preview was quit and its temporary sample directory was cleaned; no personal folders were scanned."
+      },
+      "mapTrash": {
+        "evidence": "Current source supports confirmed ordinary-file and folder moves. Historical file-only runtime evidence is retained below; folder runtime review is recorded separately.",
+        "entry": "Native Move to Trash\u2026 context-menu item on eligible ordinary file and folder rows and tiles; matching accessibility action. No new persistent buttons.",
+        "excluded": [
+          "Application and document packages",
+          "Current scanned root",
+          "Grouped Other items",
+          "Items lacking a valid regular-file or directory scan snapshot",
+          "Folders whose full subtree cannot be verified, including unsupported descendants"
+        ],
+        "confirmation": {
+          "name": "Move \u201c[name]\u201d to Trash?",
+          "fields": [
+            "Full item path, selectable with native tooltip",
+            "Allocated size independent of map hard-link attribution; folders use a complete preflight including hidden contents",
+            "For folders: all contents, including hidden items, move with the folder",
+            "Finder restoration sentence"
+          ],
+          "unit": "pt",
+          "width": 470,
+          "padding": 26,
+          "groupSpacing": 18,
+          "icon": "trash",
+          "iconSize": 25,
+          "iconColor": "SwiftUI .secondary",
+          "titleTypography": "typography.confirmation-title",
+          "pathLines": 4,
+          "actions": "Cancel is the default Return action; Escape cancels. Move to Trash is an explicit destructive bordered-prominent button.",
+          "demo": "Confirmation preview allowed; Move to Trash disabled with a visible demo explanation."
+        },
+        "preparation": "Immutable request is prepared from a current scan result and fresh item/path checks. Folders receive a full hidden-inclusive subtree inspection. Footer shows Checking item\u2026 and offers Cancel; cancellation propagates to the worker.",
+        "execution": "Fresh item, scanned-root, and ancestor checks precede FileManager.trashItem. Folder contents must match their preflight manifest. Unsupported, unreadable, over-limit, changed, or replaced items are refused. No elevated privileges, permanent-deletion fallback, or Trash emptying.",
+        "busy": "Navigation and new scans are guarded during preparation and the move. Ordinary scan Back behavior is preserved.",
+        "outcome": "Success clears the old result and timestamp, rescans the current folder, and names the moved item in a notice. Failure uses Unable to move item to Trash, preserves results, and reports the reason.",
+        "automatedTests": {
+          "passing": 74,
+          "failures": 0,
+          "scope": "Historical file-only release suite: 74 tests, including 21 guarded-Trash tests and 8 model-flow tests. New folder and Uninstaller verification is recorded separately."
+        },
+        "runtimeReview": {
+          "reviewedAt": "2026-10-17",
+          "environment": "Separate release-copy demo bundle using disposable sample files.",
+          "captures": [
+            {
+              "path": ".impeccable/review/map-trash-menu.png",
+              "dimensions": {
+                "width": 1120,
+                "height": 790
+              },
+              "observed": "File tile context menu offers Show in Finder and Move to Trash\u2026."
+            },
+            {
+              "path": ".impeccable/review/map-trash-confirmation.png",
+              "dimensions": {
+                "width": 470,
+                "height": 259
+              },
+              "observed": "Compact Preview.mov confirmation shows its exact path and 3 MB allocation; demo Move to Trash is disabled."
+            }
+          ],
+          "observedInteractions": [
+            "Projects folder context menu has only Open folder and Show in Finder.",
+            "Entering Website automatically scans and shows 2 items totaling 4.2 MB.",
+            "Preview.mov tile context action opens the correct 3 MB confirmation. Return dismisses it, leaving both files unchanged.",
+            "Assets.zip row context action opens the correct path and 1.2 MB confirmation. Escape dismisses it, leaving both files unchanged.",
+            "The accessibility tree exposes Move to Trash as a custom action on each file row and tile."
+          ],
+          "releaseVerification": "Optimized release build passed. Strict signature verification of the final build/Mac Tools.app passed again after preview cleanup.",
+          "limits": [
+            "Actual macOS Trash movement was not exercised; automated fixtures use an injected move operation and demo mode prevents moves.",
+            "Accessibility action exposure was inspected; no VoiceOver operation is claimed."
+          ],
+          "sampleLifecycle": "Normal Quit removed the disposable demo directory, and the separate preview bundle was removed. No personal files were moved.",
+          "scope": "Historical file-only release review, before folder support was added. Its folder-menu observation describes that earlier version."
+        }
+      },
+      "uninstaller": {
+        "evidence": "Current source inspection, 121 passing project tests, and folderTrashUninstallerReview native demo evidence.",
+        "sourceFiles": [
+          "Sources/MacTools/UI/AppUninstallerView.swift",
+          "Sources/MacTools/UI/AppUninstallerModel.swift",
+          "Sources/MacTools/Core/AppUninstaller.swift"
+        ],
+        "layout": {
+          "unit": "pt",
+          "appListWidth": 260,
+          "paneGap": 24,
+          "contentGutter": 36,
+          "rowIconSize": 32,
+          "detailIconSize": 48,
+          "rowPadding": 9,
+          "searchPadding": 10,
+          "searchCornerRadius": 8,
+          "rowCornerRadius": 8,
+          "confirmationWidth": 560,
+          "confirmationPadding": 26,
+          "confirmationGroupGap": 18,
+          "confirmationListMaxHeight": 220
+        },
+        "scope": "Discover apps in /Applications and ~/Applications. Match only exact bundle-identifier paths in Caches, Preferences, Application Support, Saved Application State, Logs, WebKit, and HTTPStorages under the current user Library. Read Info.plist for app identity; never launch the app for inspection.",
+        "exclusions": [
+          "System locations",
+          "Mac Tools itself",
+          "Shared containers",
+          "Privileged helpers and background-service removal",
+          "Fuzzy app-name matches",
+          "Incomplete removal targets",
+          "Symlink targets or symlink ancestors",
+          "Cloud and placeholder locations"
+        ],
+        "selection": "Choose one app. Related-file checkboxes are optional, initially empty on each inspection, and disabled for incomplete items. App removal is always included in review.",
+        "copy": "App uninstaller title, Search apps, app count, app identity/path/size, Related files, needed progress/status, and Review\u2026. Scope and matching details live in two contextual help controls.",
+        "states": "First visit discovers apps. Selected app inspection shows Checking files\u2026. Running apps show a visible quit-and-check-again requirement. Notices and errors stay visible. Cancel scan is available for discovery and inspection; removal guards refresh and selection. Switching tools preserves state.",
+        "confirmation": "Uninstall \u201c[app]\u201d? with visible app-only or selected-related-file consequence, each item path and size, total, and Finder restoration. Return and Escape cancel; Move to Trash requires explicit activation and is disabled in demo.",
+        "execution": "App Info.plist is bound to inventory identity. All selected manifests are checked before the first move and each item is checked again immediately before its move. The app moves first; its failure leaves related files untouched. Internal symbolic links are recorded without following their targets. No permanent-delete fallback, elevation, or Trash emptying.",
+        "demo": "Three disposable sample apps with exact related-file matches. Every move remains disabled."
+      },
+      "folderTrashUninstallerReview": {
+        "reviewedAt": "2026-10-17",
+        "disposition": "ship",
+        "record": ".impeccable/review/FOLDER-TRASH-UNINSTALLER-REVIEW.md",
+        "scope": "Bounded independent source and native demo capture review; no detector ran.",
+        "appearance": "dark",
+        "environment": "Separate release-copy demo bundle with disposable sample folders and apps.",
+        "captures": [
+          {
+            "path": ".impeccable/review/folder-trash-menu.png",
+            "dimensions": {
+              "width": 1120,
+              "height": 790
+            },
+            "observed": "Projects tile menu offers Open folder, Show in Finder, and Move to Trash\u2026."
+          },
+          {
+            "path": ".impeccable/review/folder-trash-confirmation.png",
+            "dimensions": {
+              "width": 470,
+              "height": 309
+            },
+            "observed": "Projects confirmation shows 4.8 MB and the visible consequence that all contents, including hidden items, move with the folder."
+          },
+          {
+            "path": ".impeccable/review/uninstaller-details.png",
+            "dimensions": {
+              "width": 1120,
+              "height": 790
+            },
+            "observed": "Three sample apps; Canvas at 4 MB, with Caches 242 KB and Application Support 82 KB initially unchecked."
+          },
+          {
+            "path": ".impeccable/review/uninstaller-confirmation.png",
+            "dimensions": {
+              "width": 560,
+              "height": 361
+            },
+            "observed": "Canvas and its selected cache path total 4.2 MB; unselected Application Support is excluded. Data consequence is visible."
+          }
+        ],
+        "interactions": [
+          "Projects tile context action opened the folder confirmation; Return cancelled.",
+          "Downloads row context action opened a 3.3 MB folder confirmation; Escape cancelled. The map retained seven items totaling 13.9 MB.",
+          "Canvas app-only review contained only the app; Return cancelled.",
+          "Selecting Caches alone produced a review of Canvas plus Caches; Application Support remained excluded. Escape cancelled.",
+          "All native demo Move to Trash buttons were disabled.",
+          "Search Sound returned one app; selecting Soundroom showed 6 MB and reset related selection to unchecked."
+        ],
+        "automatedTests": {
+          "passing": 121,
+          "failures": 0,
+          "evidence": "/private/tmp/mac-tools-folder-uninstaller-tests.log",
+          "scope": "Full project suite, including 37 Storage Map Trash backend tests, 17 Uninstaller backend tests, 12 Uninstaller model tests, and folder-model confirmation/refresh coverage."
+        },
+        "postCaptureChange": "Corrected singular app-count wording; final-bundle accessibility inspection confirmed Search Sound shows 1 app. The final metadata guard does not change presentation.",
+        "limits": [
+          "Actual macOS Trash execution was not exercised; tests use injected handlers and fixture moves, and native demo mode disables removal.",
+          "Light appearance, minimum window size, and VoiceOver operation were not exercised in this pass."
+        ],
+        "releaseVerification": "Final optimized release build and strict signature verification passed without warnings or errors. Full project suite passed 121 tests after the final app-metadata guard.",
+        "sampleLifecycle": "Both native preview runs quit normally. Their disposable fixture directories were confirmed removed, and the separate preview bundle was removed. No personal files were moved."
+      },
+      "additionalTools": {
+        "evidence": "Source inspection records implementation scope only. Runtime, test, build, and visual evidence for these six tools is tracked separately under .impeccable/review.",
+        "style": "Extend the existing system typography, adaptive native surfaces, teal accent, SF Symbols, HelpTip, concise labels, and fixed footers. No new brand or separate visual style.",
+        "duplicateFinder": {
+          "sourceFiles": [
+            "Sources/MacTools/UI/DuplicateFinderView.swift",
+            "Sources/MacTools/UI/DuplicateFinderModel.swift",
+            "Sources/MacTools/Core/DuplicateFinder.swift",
+            "Sources/MacTools/Core/DuplicateFileAccess.swift"
+          ],
+          "surface": ".impeccable/surfaces/duplicate-finder.md",
+          "flow": "Folder choice, cancellable content scan, grouped file rows, initially empty selection, exact review, explicit Trash.",
+          "constraint": "Keep at least one copy per group; recheck affected contents including a retained copy before moving. Skip links, Finder aliases, resource-fork files, hidden items, packages, cloud locations, other volumes, and repeated hard-link identities. Notices remain visible.",
+          "confirmation": {
+            "width": 560,
+            "padding": 26,
+            "listMaxHeight": 220,
+            "unit": "pt",
+            "returnAndEscape": "Cancel",
+            "demo": "Moving disabled"
+          }
+        },
+        "startupManager": {
+          "sourceFiles": [
+            "Sources/MacTools/UI/StartupManagerView.swift",
+            "Sources/MacTools/UI/StartupManagerModel.swift",
+            "Sources/MacTools/Core/StartupManager.swift"
+          ],
+          "surface": ".impeccable/surfaces/startup-manager.md",
+          "flow": "Read launch configurations; search labels/programs; filter scope; inspect configured trigger; reveal a file or open native Login Items settings.",
+          "scope": [
+            "~/Library/LaunchAgents",
+            "/Library/LaunchAgents",
+            "/Library/LaunchDaemons"
+          ],
+          "constraint": "Configuration data is not live launchd status or an exhaustive modern login/background-item list. No service edits, unloads, or administrator requests. Invalid or unreadable entries remain visible.",
+          "limits": {
+            "entriesPerLocation": 1024,
+            "plistBytes": 1048576
+          },
+          "issuesSheet": {
+            "width": 540,
+            "height": 400,
+            "padding": 28,
+            "unit": "pt"
+          }
+        },
+        "systemMonitor": {
+          "sourceFiles": [
+            "Sources/MacTools/UI/SystemMonitorView.swift",
+            "Sources/MacTools/UI/SystemMonitorModel.swift",
+            "Sources/MacTools/Core/SystemMonitor.swift",
+            "Sources/MacTools/MacToolsApp.swift"
+          ],
+          "surface": ".impeccable/surfaces/system-monitor.md",
+          "flow": "Five flat metric rows and an optional native menu-bar extra; no decorative charts or invented health score.",
+          "metricRows": {
+            "labels": [
+              "CPU",
+              "Active memory",
+              "Storage",
+              "Disk activity",
+              "Network"
+            ],
+            "labelSize": 14,
+            "valueSize": 16,
+            "verticalPadding": 27,
+            "unit": "pt"
+          },
+          "semantics": "CPU averaged across cores; memory includes active/wired/compressed pages; home-volume storage; available physical disk drivers; active Ethernet/Wi-Fi/cellular links, excluding loopback/bridges/VPN tunnels.",
+          "lifecycle": "Sample every two seconds while selected or menu-bar item enabled. Rates need two compatible readings and reset after long gaps. Unavailable values remain explicit. Stop on quit; no network requests.",
+          "menuPreference": "@AppStorage(\"showSystemMonitorMenuBar\"), default false; enabled keeps app alive after last window closes"
+        },
+        "batchRenamer": {
+          "sourceFiles": [
+            "Sources/MacTools/UI/BatchRenamerView.swift",
+            "Sources/MacTools/UI/BatchRenamerModel.swift",
+            "Sources/MacTools/Core/BatchRename.swift"
+          ],
+          "surface": ".impeccable/surfaces/batch-renamer.md",
+          "flow": "Choose files; find/replace, affixes, numbering, or date; Original/New name preview; review; confirm; optional reviewed Undo Last Batch.",
+          "constraint": "Extensions preserved by default; files stay in original folders. Changed files, invalid names, collisions, and multiple selected hard links to one file are refused. Apply finishes or attempts rollback before normal quit. Undo is session-local and depends on unchanged files.",
+          "confirmation": {
+            "width": 540,
+            "padding": 26,
+            "listMaxHeight": 240,
+            "unit": "pt",
+            "returnAndEscape": "Cancel",
+            "demo": "Renaming disabled"
+          }
+        },
+        "clipboardHistory": {
+          "sourceFiles": [
+            "Sources/MacTools/UI/ClipboardHistoryView.swift",
+            "Sources/MacTools/UI/ClipboardHistoryModel.swift",
+            "Sources/MacTools/Core/ClipboardHistory.swift"
+          ],
+          "surface": ".impeccable/surfaces/clipboard-history.md",
+          "flow": "Starts paused; explicit Start captures only new text/image copies; search, preview, Copy, Pause, remove, or Clear.",
+          "constraint": "Session memory only; no disk persistence; quit clears history. Copy never pastes into another app. Recognized sensitive/transient markers are skipped, but unmarked sensitive content can still be captured. Demo disables real capture and writes.",
+          "limits": {
+            "items": 100,
+            "historyBytes": 20971520,
+            "textBytes": 262144,
+            "imageBytes": 8388608,
+            "imagePixels": 16000000
+          }
+        },
+        "fileConverter": {
+          "sourceFiles": [
+            "Sources/MacTools/UI/FileConverterView.swift",
+            "Sources/MacTools/UI/FileConverterModel.swift",
+            "Sources/MacTools/Core/FileConverter.swift"
+          ],
+          "surface": ".impeccable/surfaces/file-converter.md",
+          "flow": "Native mode picker, relevant settings, ordered input list, output folder, Convert, export sizes, and visible issues/cancellation.",
+          "modes": [
+            "Images",
+            "Combine PDFs",
+            "Compress PDFs"
+          ],
+          "imageFormats": [
+            "JPEG",
+            "PNG",
+            "TIFF"
+          ],
+          "constraint": "Originals kept and existing exports never overwritten. PDF compression flattens pages and visibly states loss of searchable text, links, forms, and annotations; size reduction is not guaranteed. Demo outputs stay in its disposable fixture folder.",
+          "limits": {
+            "inputs": 100,
+            "inputBytes": 268435456,
+            "pdfPages": 1000,
+            "batchInputBytes": 536870912
+          },
+          "issuesSheet": {
+            "width": 480,
+            "padding": 28,
+            "listHeight": 240,
+            "unit": "pt"
+          }
+        }
+      },
+      "additionalToolsReview": {
+        "date": "2026-10-17",
+        "report": ".impeccable/review/ALL-TOOLS-REVIEW.md",
+        "automatedTests": {
+          "count": 205,
+          "failures": 0,
+          "log": "/private/tmp/mac-tools-all-tests.log"
+        },
+        "release": {
+          "version": "0.3.0",
+          "path": "build/Mac Tools.app",
+          "optimized": true,
+          "strictAdHocSignatureVerified": true,
+          "log": "/private/tmp/mac-tools-all-build.log"
+        },
+        "visualScope": "Native disposable demo, dark appearance at 1120 x 790, six tool surfaces, duplicate and rename confirmations. Core tests verify actual fixture renames/Undo and PDF operations. Native image export exercised in demo.",
+        "limitations": "Light and minimum-size layouts, VoiceOver, native PDF workflow, live system clipboard capture, and actual Trash API were not exercised in this pass. Preview kept open while the user was interacting with it; its disposable fixtures are removed on normal quit."
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "description": "Illustrative browser translation of the native large bordered-prominent action; SwiftUI supplies its exact geometry and interaction states.",
+      "html": "<div class=\"ds-preview\"><button class=\"ds-primary\">Scan storage</button></div>",
+      "css": ".ds-preview{font-family:system-ui,sans-serif;color-scheme:light dark;color:CanvasText;--ds-accent:color(srgb .08 .40 .33)}@media(prefers-color-scheme:dark){.ds-preview{--ds-accent:color(srgb .39 .79 .69)}}.ds-primary{font:500 13px system-ui;color:Canvas;background:var(--ds-accent);border:1px solid transparent;border-radius:6px;padding:8px 13px}.ds-primary:hover{filter:brightness(1.08)}.ds-primary:active{filter:brightness(.92)}.ds-primary:focus-visible{outline:3px solid Highlight;outline-offset:3px}.ds-primary:disabled{opacity:.45}"
+    },
+    {
+      "name": "Search field",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Plain native search field inside the rounded window surface; browser input focus is illustrative.",
+      "html": "<div class=\"ds-preview\"><input class=\"ds-search\" aria-label=\"Filter by name or path\" placeholder=\"Filter by name or path\"></div>",
+      "css": ".ds-preview{font-family:system-ui,sans-serif;color-scheme:light dark;color:CanvasText;--ds-accent:color(srgb .08 .40 .33)}@media(prefers-color-scheme:dark){.ds-preview{--ds-accent:color(srgb .39 .79 .69)}}.ds-search{font:400 13px system-ui;color:CanvasText;background:Canvas;border:0;border-radius:6px;padding:9px;width:260px}.ds-search::placeholder{color:GrayText}.ds-search:hover{outline:1px solid GrayText}.ds-search:focus-visible{outline:3px solid Highlight;outline-offset:2px}"
+    },
+    {
+      "name": "Selected tool",
+      "kind": "nav",
+      "refersTo": "navigation-selected",
+      "description": "Cleaner selection uses accent text and a ten-percent accent fill; the native source also includes its SF Symbol and selected accessibility trait.",
+      "html": "<nav class=\"ds-preview\"><span class=\"ds-navigation\" aria-current=\"page\">Cleaner</span></nav>",
+      "css": ".ds-preview{font-family:system-ui,sans-serif;color-scheme:light dark;color:CanvasText;--ds-accent:color(srgb .08 .40 .33)}@media(prefers-color-scheme:dark){.ds-preview{--ds-accent:color(srgb .39 .79 .69)}}.ds-navigation{display:block;width:158px;font:600 14px system-ui;padding:12px 13px;color:var(--ds-accent);background:color-mix(in srgb,var(--ds-accent) 10%,transparent);border-radius:8px}"
+    },
+    {
+      "name": "Selected category filter",
+      "kind": "chip",
+      "refersTo": "category-filter",
+      "description": "Selected filter has an eleven-percent accent fill and semibold title; count remains secondary.",
+      "html": "<div class=\"ds-preview\"><button class=\"ds-filter\" aria-pressed=\"true\">All files <span>7</span></button></div>",
+      "css": ".ds-preview{font-family:system-ui,sans-serif;color-scheme:light dark;color:CanvasText;--ds-accent:color(srgb .08 .40 .33)}@media(prefers-color-scheme:dark){.ds-preview{--ds-accent:color(srgb .39 .79 .69)}}.ds-filter{font:600 11px system-ui;color:var(--ds-accent);background:color-mix(in srgb,var(--ds-accent) 11%,transparent);border:0;border-radius:6px;padding:8px 10px}.ds-filter span{color:GrayText;margin-left:5px}.ds-filter:hover{filter:brightness(1.08)}.ds-filter:active{filter:brightness(.92)}.ds-filter:focus-visible{outline:3px solid Highlight;outline-offset:2px}"
+    },
+    {
+      "name": "Disk overview",
+      "kind": "card",
+      "refersTo": "disk-card",
+      "description": "Illustrative disk values demonstrate the native hierarchy and used-capacity meter; these are preview data, not the current disk.",
+      "html": "<div class=\"ds-preview\"><section class=\"ds-disk\"><div class=\"ds-disk-top\"><span>Macintosh HD</span><strong>160 GB available</strong></div><div class=\"ds-meter\" role=\"meter\" aria-label=\"Storage usage\" aria-valuemin=\"0\" aria-valuemax=\"500\" aria-valuenow=\"340\"><span></span></div><div class=\"ds-disk-meta\"><span>340 GB used</span><span>500 GB total</span></div></section></div>",
+      "css": ".ds-preview{font-family:system-ui,sans-serif;color-scheme:light dark;color:CanvasText;--ds-accent:color(srgb .08 .40 .33)}@media(prefers-color-scheme:dark){.ds-preview{--ds-accent:color(srgb .39 .79 .69)}}.ds-disk{width:400px;padding:22px;background:color-mix(in srgb,Canvas 70%,Field);border-radius:12px}.ds-disk-top,.ds-disk-meta{display:flex;justify-content:space-between;gap:16px}.ds-disk-top{font:500 14px system-ui}.ds-disk-top strong{font-weight:600}.ds-meter{height:13px;margin:14px 0;background:color-mix(in srgb,var(--ds-accent) 10%,transparent);border-radius:5px;overflow:hidden}.ds-meter span{display:block;height:100%;width:68%;background:var(--ds-accent);border-radius:5px}.ds-disk-meta{font:400 12px system-ui;color:GrayText;font-variant-numeric:tabular-nums}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A legible storage workbench",
+    "overview": "Mac Tools uses native macOS typography, controls, and adaptive surfaces to keep file information easy to read. Forest teal marks the current tool, category selection, storage usage, and primary actions. The interface is compact where files repeat and spacious where the user chooses the next step. Concise necessary labels carry the workflow; secondary explanations live in contextual help. The user explicitly prefers a clean, simple interface without slogans, redundant labeling, or repeated reassurance.\n\nThis document records the nine implemented SwiftUI tools on macOS 14 or later. The name is provisional. Native source is authoritative: `Sources/MacTools/UI/Theme.swift`, the shared `AppShellView.swift`, each tool\u2019s view and model in that directory, and `Sources/MacTools/MacToolsApp.swift`. All layout measurements are macOS logical points. Frontmatter captures explicit reusable values; native colors and control styling remain owned by AppKit and SwiftUI. No fixed neutral colors, custom font, or separate visual identity for individual tools has been established. New tool descriptions below record source behavior; they do not imply a completed runtime or visual verification pass.",
+    "keyCharacteristics": [
+      "Concise action and data labels, with contextual help for secondary explanations.",
+      "Adaptive native surfaces with a single forest-teal accent.",
+      "System type, tabular size readouts, and SF Symbols.",
+      "Compact, separated file rows with visible names, paths, and sizes.",
+      "Explicit selection and a review sheet before moving files to Trash.",
+      "A proportional storage map with a complete child-item list and confirmed file and folder Trash actions.",
+      "A searchable app list, optional related-file selection, and explicit uninstall review.",
+      "Duplicate groups with explicit selection and a required retained copy.",
+      "Before-and-after rename previews, confirmation, and reviewed latest-batch Undo.",
+      "Scoped startup configuration review and local system readings with an optional native menu-bar item.",
+      "Clipboard history that starts paused and remains session-local.",
+      "Original-preserving exports, with PDF flattening consequences visible before conversion."
+    ],
+    "rules": [
+      {
+        "name": "The Adaptive Surface Rule",
+        "body": "Resolve surfaces, text, separators, and control states through native semantic APIs; use the appearance-specific accent through `Palette.accent`.",
+        "section": "colors"
+      },
+      {
+        "name": "The File Legibility Rule",
+        "body": "Keep the filename visually stronger than its path, and right-align file sizes so a list can be compared quickly.",
+        "section": "typography"
+      },
+      {
+        "name": "The Necessary Labels Rule",
+        "body": "Keep action and data labels concise; put secondary explanations in accessible contextual help. Keep errors, partial results, and destructive consequences visible at the point where they affect a decision.",
+        "section": "components"
+      },
+      {
+        "name": "The Review Before Cleanup Rule",
+        "body": "A scan or filter never authorizes removal. Show the exact file scope and require explicit confirmation before moving files to Trash, through Cleaner review, the Storage Map item confirmation, Uninstaller review, or Duplicate Finder review. Renaming also requires a before-and-after review and confirmation.",
+        "section": "components"
+      },
+      {
+        "name": "The Measured Area Rule",
+        "body": "Derive map geometry from scanned byte totals, keep the full child list available, and name partial or shared-size attribution instead of presenting those values as complete folder usage.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** keep necessary labels concise and provide secondary explanations through contextual help with hover, keyboard, and click access.",
+      "**Do** use native semantic surfaces and the adaptive accent in both appearances.",
+      "**Do** keep file names, paths, sizes, and selection state legible together.",
+      "**Do** preserve the fixed footer and the distinction between scan scope, results, and review.",
+      "**Do** use SF Symbols and native interaction states for controls.",
+      "**Do** state partial scans, cancellation, failures, and demo limitations in visible text.",
+      "**Do** pair the proportional map with its complete, size-sorted child list and accessible item actions."
+    ],
+    "donts": [
+      "**Don't** add slogans, redundant labels, repeated reassurance, or unnecessary help icons.",
+      "**Don't** hide essential errors, partial-result status, or destructive consequences in tooltips.",
+      "**Don't** hard-code neutral colors sampled from a light or dark screenshot.",
+      "**Don't** imply that an empty or partial scan proves the Mac is clean.",
+      "**Don't** automatically select results or substitute a cleanup total for an explicit review.",
+      "**Don't** claim that moving files to Trash immediately frees disk space.",
+      "**Don't** promote the provisional name or undecided future tools into new brand commitments.",
+      "**Don't** use tile shades as safety or file-type categories, or equate a partial total with complete folder usage.",
+      "**Don't** imply startup configuration equals current service state, an unavailable metric equals zero, or PDF compression always saves space.",
+      "**Don't** enable clipboard recording automatically, persist clipboard history, or hide the PDF flattening consequence in help."
+    ]
+  }
+}
