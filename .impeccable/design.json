@@ -38,11 +38,11 @@
     "typographyMeta": {
       "headline": {
         "displayName": "Main heading",
-        "purpose": "Main headings across the native tools."
+        "purpose": "Main headings across the native tools and Settings page."
       },
       "dialog-title": {
         "displayName": "Dialog title",
-        "purpose": "Review and Settings headings."
+        "purpose": "Review headings."
       },
       "title": {
         "displayName": "Section title",
@@ -82,7 +82,7 @@
       "units": "Native dimensions in DESIGN.md use logical macOS points. Browser previews use CSS pixels only as schematic translations.",
       "previewLimitations": "HTML/CSS snippets satisfy the design-panel preview format. They are illustrative, have no application behavior, omit SF Symbols, and do not define native button geometry, focus rings, semantic colors, or hover behavior. SwiftUI source and DESIGN.md are authoritative.",
       "appearance": {
-        "storage": "@AppStorage(\"appearance\")",
+        "storage": "AppSettings persists the existing UserDefaults \"appearance\" key; default system.",
         "values": [
           "system",
           "light",
@@ -154,7 +154,8 @@
         "monitor": "waveform.path.ecg",
         "renamer": "character.cursor.ibeam",
         "clipboard": "clipboard",
-        "converter": "arrow.triangle.2.circlepath"
+        "converter": "arrow.triangle.2.circlepath",
+        "keyVault": "lock.rectangle"
       },
       "components": [
         {
@@ -236,7 +237,7 @@
         "shortcuts": {
           "Command-1": "Cleaner",
           "Command-2": "Storage Map",
-          "Command-R": "Scan or refresh the selected tool; File Converter opens Add files, Clipboard History is disabled.",
+          "Command-R": "Scan or refresh the selected tool; File Converter opens Add files, Clipboard History and Settings are disabled.",
           "Command-Return": "Open an available Cleaner, Uninstaller, Duplicate Finder, or Batch Renamer review.",
           "Command-[": "Go to the parent folder in Storage Map and scan it.",
           "Command-3": "Uninstaller",
@@ -245,7 +246,9 @@
           "Command-6": "System Monitor",
           "Command-7": "Batch Renamer",
           "Command-8": "Clipboard History",
-          "Command-9": "File Converter"
+          "Command-9": "File Converter",
+          "Command-,": "Open the main-window Settings page.",
+          "Control-Option-V": "Open the temporary Key Vault quick-paste picker while Mac Tools is running and quick paste is enabled."
         },
         "navigation": "Tool buttons scroll within the existing 208pt sidebar; Settings remains below the tool list."
       },
@@ -316,7 +319,7 @@
         "evidence": "The click-open help popover was exercised and captured. Tooltip content was present in the accessibility tree; dwell-hover and keyboard activation were not exercised."
       },
       "cleanerCopy": "Header title and contextual help; Scan locations heading with category names and contextual description/path help; concise Scanning\u2026 state; Files to review result heading; footer selection total and actions. Essential notices and Trash consequences remain visible.",
-      "settingsCopy": "Settings title, appearance segmented picker, version, Done, and contextual About Mac Tools help.",
+      "settingsCopy": "Settings page with General, Menu Bar, Clipboard, and Key Vault native form groups; Theme, Open at launch, Launch at login, Show Mac Tools in menu bar, Show CPU usage, Capture clipboard on launch, History limit, and Quick paste (\u2303\u2325V); visible history and closed-window consequences; conditional system-settings actions, approval states, registration errors, contextual help, and version footer.",
       "runtimeReview": {
         "appearance": "dark",
         "window": {
@@ -656,8 +659,8 @@
             "unit": "pt"
           },
           "semantics": "CPU averaged across cores; memory includes active/wired/compressed pages; home-volume storage; available physical disk drivers; active Ethernet/Wi-Fi/cellular links, excluding loopback/bridges/VPN tunnels.",
-          "lifecycle": "Sample every two seconds while selected or menu-bar item enabled. Rates need two compatible readings and reset after long gaps. Unavailable values remain explicit. Stop on quit; no network requests.",
-          "menuPreference": "@AppStorage(\"showSystemMonitorMenuBar\"), default false; enabled keeps app alive after last window closes"
+          "lifecycle": "Sample every two seconds while the monitor page is visible or both menu-bar item and CPU display are enabled. Rates need two compatible readings and reset after long gaps. Unavailable values remain explicit. Stop on quit; no network requests.",
+          "menuPreference": "AppSettings persists showMenuBarItem and the existing showSystemMonitorMenuBar CPU preference, both default false. Migrate an existing enabled CPU preference to menu visibility once. Show Mac Tools in menu bar controls visibility and keeps the app alive after its last window closes; Show CPU usage controls the CPU title, readings, and background sampling while the item is visible. Login or explicit background launches enable menu visibility, use accessory activation policy, and do not create the main window. CPU display remains off by default and retains an explicit user choice."
         },
         "batchRenamer": {
           "sourceFiles": [
@@ -684,14 +687,21 @@
             "Sources/MacTools/Core/ClipboardHistory.swift"
           ],
           "surface": ".impeccable/surfaces/clipboard-history.md",
-          "flow": "Starts paused; explicit Start captures only new text/image copies; search, preview, Copy, Pause, remove, or Clear.",
-          "constraint": "Session memory only; no disk persistence; quit clears history. Copy never pastes into another app. Recognized sensitive/transient markers are skipped, but unmarked sensitive content can still be captured. Demo disables real capture and writes.",
+          "flow": "Starts paused by default; explicit Start or Settings launch opt-in captures only new text/image copies. Search, preview, Copy, Save to Key Vault through Name/Sensitive sheet, Pause, remove, or Clear. Start/Pause never changes launch preference.",
+          "constraint": "Session history stays in memory and quit clears it. Explicit vault saves persist separately; clearing history/limit changes never delete vault entries. Saving or marking sensitive removes matching current history entries; future capture skips matches against sensitive vault values already loaded in memory. Never imports existing clipboard. Count changes retain newest entries without altering capture state. Copy never pastes elsewhere. Recognized markers are skipped; unmarked or unloaded sensitive values can still be captured. Demo disables real capture/writes, and vault saves stay in memory.",
           "limits": {
-            "items": 100,
             "historyBytes": 20971520,
             "textBytes": 262144,
             "imageBytes": 8388608,
-            "imagePixels": 16000000
+            "imagePixels": 16000000,
+            "itemChoices": [
+              25,
+              50,
+              100,
+              200,
+              500
+            ],
+            "itemsDefault": 100
           }
         },
         "fileConverter": {
@@ -725,6 +735,60 @@
             "listHeight": 240,
             "unit": "pt"
           }
+        },
+        "keyVault": {
+          "sourceFiles": [
+            "Sources/MacTools/UI/KeyVaultView.swift",
+            "Sources/MacTools/UI/KeyVaultModel.swift",
+            "Sources/MacTools/Core/KeyVault.swift",
+            "Sources/MacTools/UI/ClipboardHistoryView.swift"
+          ],
+          "surface": ".impeccable/surfaces/key-vault.md",
+          "navigation": "Separate Key Vault page in the Files sidebar; Tools menu entry; --key-vault preview flag.",
+          "flow": "Save selected text or image from Clipboard History through Name/Sensitive sheet; search safe names or ordinary content; select and preview; Reveal/Hide sensitive previews; Copy, edit Details, or confirm Delete. Control-Option-V opens a separate guarded paste picker.",
+          "layout": {
+            "listWidth": 280,
+            "unit": "pt",
+            "pattern": "Shared searchable split-pane list and flexible preview, title/help, fixed count/status and Details/Delete/Copy footer. Concise native save/details metadata sheets."
+          },
+          "storage": "Only explicitly saved items persist. AES-GCM encrypted local Application Support/MacTools/KeyVault/vault.enc file, including names and sensitivity flags; encryption key held in macOS Keychain. Existing entries default to nonsensitive. No plaintext fallback.",
+          "limits": {
+            "items": 500,
+            "contentBytes": 20971520,
+            "policy": "Refuse new saves over capacity; never automatically evict saved entries.",
+            "titleCharacters": 200,
+            "titleUTF8Bytes": 800
+          },
+          "confirmation": "470pt native sheet uses the safe display name, conceals sensitive content, and explains permanent removal from Key Vault; current clipboard and session history remain unchanged. Return and Escape cancel; Delete requires explicit activation.",
+          "states": "Visible loading, save/Keychain/decryption errors, Retry, no saved items, no matching items, selection-disabled actions, and sensitive concealed/revealed preview states. No authentication or lock feature.",
+          "demo": "Fictional named sensitive item; save/delete/edit metadata and Reveal/Hide only in memory. Never access disk, Keychain, or host clipboard; no global registration or cross-app paste.",
+          "historyRelationship": "Clearing session history, changing its limit, and quitting never delete vault items. Saving or marking sensitive removes matching current history entries; capture excludes matches against sensitive entries already loaded in memory. Unmarked or unloaded values can still be captured.",
+          "evidence": ".impeccable/review/SETTINGS-VAULT-REVIEW.md",
+          "quickPasteSurface": ".impeccable/surfaces/key-vault-quick-paste.md",
+          "sensitive": {
+            "choice": "User chose Hide contents until you click Reveal; no Touch ID or password authentication.",
+            "display": "Only safe visible name or Sensitive item appears in rows, picker, deletion sheet, and accessibility labels. Names stay visible.",
+            "search": "Sensitive entries match safe names only, never content, including while preview is revealed.",
+            "reveal": "Explicit Reveal/Hide on full preview; hide on selection/tool change, app deactivation, view disappearance, or 30-second timeout.",
+            "clipboard": "Sensitive Copy and Paste add a concealed marker and clear after 30 seconds or normal quit only if clipboard still holds the unchanged Mac Tools-owned copy. Other apps may ignore markers or retain previously read values.",
+            "meaning": "Visual privacy; existing encrypted storage protects all entries, and marking sensitive adds neither authentication nor a new encryption boundary."
+          },
+          "evidenceScope": "Existing Settings/vault report predates Sensitive, metadata sheets, masking, history exclusion, and conditional clipboard clearing. New build/review pending.",
+          "schema": {
+            "readPayloadVersions": [
+              1,
+              2
+            ],
+            "writePayloadVersion": 2,
+            "fileHeader": "MTKV1",
+            "authenticatedContext": "MacTools.KeyVault.v1",
+            "legacyMetadataDefaults": {
+              "title": "",
+              "isSensitive": false
+            },
+            "downgradeGuard": "Earlier version-1 builds reject a newly saved payload rather than silently dropping sensitivity metadata."
+          },
+          "metadataSheets": "470pt native Save/Details sheet with a visible LabeledContent Name label, explicit accessibility label, optional-name prompt, Sensitive toggle/help, name validation, busy indicator, Cancel and Save. Save is disabled while busy; submission guards retain edits if an operation cannot begin."
         }
       },
       "additionalToolsReview": {
@@ -744,6 +808,249 @@
         },
         "visualScope": "Native disposable demo, dark appearance at 1120 x 790, six tool surfaces, duplicate and rename confirmations. Core tests verify actual fixture renames/Undo and PDF operations. Native image export exercised in demo.",
         "limitations": "Light and minimum-size layouts, VoiceOver, native PDF workflow, live system clipboard capture, and actual Trash API were not exercised in this pass. Preview kept open while the user was interacting with it; its disposable fixtures are removed on normal quit."
+      },
+      "settings": {
+        "sourceFiles": [
+          "Sources/MacTools/UI/SettingsView.swift",
+          "Sources/MacTools/UI/AppSettings.swift",
+          "Sources/MacTools/UI/LaunchAtLoginModel.swift",
+          "Sources/MacTools/UI/AppShellView.swift",
+          "Sources/MacTools/MacToolsApp.swift",
+          "Sources/MacTools/UI/AppLaunchContext.swift",
+          "Sources/MacTools/UI/MainWindowController.swift"
+        ],
+        "surface": ".impeccable/surfaces/settings.md",
+        "navigation": "Fixed sidebar Settings row, Mac Tools menu, Command-comma, and menu-bar Settings action all open the same main-window page. No separate modal or Settings scene.",
+        "form": {
+          "style": "Native grouped Form",
+          "groups": [
+            "General",
+            "Menu Bar",
+            "Clipboard",
+            "Key Vault"
+          ],
+          "maxWidth": 720,
+          "unit": "pt",
+          "headingToken": "headline",
+          "surface": "Palette.panel"
+        },
+        "defaults": {
+          "appearance": "system",
+          "startupTool": "cleaner",
+          "launchAtLogin": "System registration; off unless already registered",
+          "showMenuBarItem": false,
+          "showSystemMonitorMenuBar": false,
+          "captureClipboardOnLaunch": false,
+          "clipboardHistoryLimit": 100,
+          "quickPasteEnabled": true
+        },
+        "persistence": "AppSettings writes preferences to local UserDefaults automatically; existing appearance and CPU-display keys are preserved. Menu visibility initializes from the legacy CPU preference once, then persists independently. LaunchAtLoginModel reads actual macOS registration rather than storing a preference. Session clipboard history remains in memory; explicitly saved Key Vault items persist separately.",
+        "timing": "Theme, menu-bar visibility, quick-paste registration, and history limit apply immediately. Opening tool and clipboard capture preference apply on the next launch. Start/Pause do not alter the launch preference.",
+        "copyPolicy": "Concise labels and contextual native help. Keep the consequence of lowering the history limit and clearing history on quit visible. No Save or Done action.",
+        "evidence": ".impeccable/review/SETTINGS-VAULT-REVIEW.md",
+        "visibleFooter": "Clipboard history clears when you quit. Lowering the limit removes older items.",
+        "quickPaste": "Quick paste (\u2303\u2325V) defaults on. It keeps the app running after its main window closes. Missing Accessibility access shows a manual System Settings action; registration conflicts remain visible. No automatic permission grant.",
+        "launchAtLogin": "SMAppService.mainApp registers or unregisters Mac Tools on an explicit toggle change. Read system status on appearance and app activation; show pending approval and errors with Login Items Settings action when needed. Login launch stays in accessory mode with the menu item enabled and no main window or Dock icon. Open the main window only on a manual app open or a main-window menu action. Demo uses in-memory registration without host changes. Actual logout/login has not been verified in this change.",
+        "menuBar": "One native MenuBarExtra controlled by showMenuBarItem. Default label uses square.stack.3d.up; optional CPU display uses the existing summary title and adds readings/Refresh. Menu provides main-window, Key Vault, Clipboard History, System Monitor, recent clipboard/capture, Settings, and Quit actions. Disable the CPU toggle while hidden, retaining its value. Login and explicit background launches enable visibility so opening and quitting remain available.",
+        "evidenceScope": "The linked Settings/vault review predates quick paste, launch at login, and the dedicated menu-bar controls; it does not validate those additions.",
+        "startupMenuEvidence": ".impeccable/review/STARTUP-MENU-REVIEW.md",
+        "backgroundLaunch": {
+          "detection": "Open-application Apple event with keyAEPropData equal to keyAELaunchedAsLogInItem; --background or MacToolsBackgroundLaunch preview flag exercises the same path.",
+          "presentation": "LSUIElement starts the process in accessory mode. Persist showMenuBarItem as true and remain in accessory mode without constructing or restoring the main window. Normal manual launch, reopening, and main-window menu actions use regular activation policy.",
+          "window": "MainWindowController owns an on-demand native AppKit window hosting the existing SwiftUI shell, preserving macOS 14 support.",
+          "lifecycle": "Initialize core services, clipboard launch capture, and quick-paste registration without depending on main-view appearance. Hidden startup-tool selection does not start monitor sampling.",
+          "cpuDefault": "Off. Retain explicit user choices."
+        },
+        "backgroundLaunchEvidence": ".impeccable/review/BACKGROUND-LAUNCH-REVIEW.md"
+      },
+      "settingsVaultReview": {
+        "report": ".impeccable/review/SETTINGS-VAULT-REVIEW.md",
+        "disposition": "ship",
+        "scope": "Native 1120 x 790 Settings and Key Vault in light/dark, Clipboard History save feedback, and the deletion sheet. Finish reviewer reported no material findings at this scope.",
+        "captures": [
+          ".impeccable/review/settings-light.png",
+          ".impeccable/review/settings-dark.png",
+          ".impeccable/review/clipboard-save-to-vault.png",
+          ".impeccable/review/key-vault-light.png",
+          ".impeccable/review/key-vault-dark.png",
+          ".impeccable/review/key-vault-delete.png"
+        ],
+        "verifiedActions": [
+          "Theme changes apply immediately.",
+          "Command-comma from Cleaner opens Settings.",
+          "Saving a demo clipboard item adds a new vault row.",
+          "Return cancels deletion; all three demo vault entries remain."
+        ],
+        "build": "build/Mac Tools.app built and passed signing verification.",
+        "tests": {
+          "targetedPassed": 42,
+          "fullExecuted": 245,
+          "fullPassed": 244,
+          "fullFailed": 1,
+          "failure": "MetadataScrubberTests.testInspectAndScrubImageEXIFAndExtendedAttributes, AdditionalToolsTests.swift:115; builder reproduced on unchanged HEAD 6ca8cf3 because sandbox JPG UTType resolves dynamic rather than .image."
+        },
+        "limitations": "Persistence/restart tests use fixture files and injected keys. Real Keychain dialogs, actual persisted-app relaunch, VoiceOver, minimum window size, and exhaustive keyboard traversal were not exercised. Native demo remains open; saved demo items are temporary. No web detector ran for native UI."
+      },
+      "quickPaste": {
+        "sourceFiles": [
+          "Sources/MacTools/UI/VaultQuickPasteController.swift",
+          "Sources/MacTools/UI/VaultQuickPasteView.swift",
+          "Sources/MacTools/UI/VaultPasteService.swift",
+          "Sources/MacTools/UI/VaultGlobalShortcut.swift"
+        ],
+        "surface": ".impeccable/surfaces/key-vault-quick-paste.md",
+        "shortcut": {
+          "display": "\u2303\u2325V",
+          "defaultEnabled": true,
+          "registration": "Carbon registers the single combination; no ordinary-keystroke monitor or Input Monitoring prompt. Registration failures are visible."
+        },
+        "panel": {
+          "type": "Borderless nonactivating native NSPanel",
+          "width": 380,
+          "padding": 16,
+          "spacing": 12,
+          "unit": "pt",
+          "position": "Near pointer; clamped to current screen visible area on opening and resizing.",
+          "appearance": "Shared native surfaces and adaptive accent; System/Light/Dark preference",
+          "minimumHeight": 220,
+          "maximumHeight": 450,
+          "heightBehavior": "Adapts to visible result count and required status, including search changes.",
+          "cornerRadius": 12,
+          "shadow": "Native window shadow"
+        },
+        "type": {
+          "title": "15pt semibold system",
+          "rows": "13pt system",
+          "footer": "11pt system"
+        },
+        "interaction": "Search; Up/Down selects; click or Return chooses; Escape, outside click, or shortcut again dismisses. Tools > Quick Paste also opens it. Sensitive rows and accessibility labels show only safe names; matching excludes sensitive values. No Reveal or authentication step in this picker.",
+        "paste": "Capture prior app and AX editable-field identity without reading textbox contents; close picker, validate access/focus and released modifiers, write chosen content, then dispatch only native Command-V to that PID. Sensitive values use concealed marker and conditional 30-second clipboard clearing. Never submit or redirect to changed destination.",
+        "fallback": "Visible permission/focus errors and explicit Copy. Accessibility Settings opens native page for manual approval. Ordinary copies remain; sensitive copies clear after 30 seconds or quit only if unchanged and still owned. Other apps may ignore the marker or retain content.",
+        "limits": "Event dispatch cannot prove custom editor insertion; images depend on target support. Main Key Vault Copy stays copy-only.",
+        "lifecycle": "Enabled shortcut or menu-bar item keeps app alive after main window closes; normal quit unregisters the shortcut. Disabled preference releases shortcut.",
+        "demo": "Tools preview only; no global registration, host clipboard access, or paste.",
+        "evidence": ".impeccable/review/QUICK-PASTE-REVIEW.md",
+        "evidenceScope": "Existing quick-paste report predates Sensitive masking and conditional clipboard clearing. New build/review pending."
+      },
+      "quickPasteReview": {
+        "report": ".impeccable/review/QUICK-PASTE-REVIEW.md",
+        "disposition": "ship",
+        "scope": "Source and screenshot review reported no confirmed material findings. Native demo UI checks do not establish physical/global shortcut dispatch or cross-app insertion.",
+        "captures": [
+          {
+            "path": ".impeccable/review/key-vault-quick-paste-light.png",
+            "width": 380,
+            "height": 242
+          },
+          {
+            "path": ".impeccable/review/key-vault-quick-paste-dark.png",
+            "width": 380,
+            "height": 242
+          },
+          {
+            "path": ".impeccable/review/key-vault-quick-paste-filtered.png",
+            "width": 380,
+            "height": 220
+          },
+          {
+            "path": ".impeccable/review/quick-paste-settings.png",
+            "width": 1120,
+            "height": 790
+          }
+        ],
+        "verifiedDemoActions": [
+          "Tools > Quick Paste opens the panel.",
+          "Searching notes filters results.",
+          "Down/Return selects and shows Demo \u00b7 Pasting disabled.",
+          "Escape dismisses the panel.",
+          "Light and dark appearances render."
+        ],
+        "build": "Final build/Mac Tools.app built and passed signing verification.",
+        "tests": {
+          "targetedPassed": 40,
+          "targetedBreakdown": {
+            "AppSettings": 7,
+            "KeyVaultModel": 11,
+            "KeyVault": 9,
+            "VaultPasteService": 13
+          },
+          "fullExecuted": 259,
+          "fullPassed": 258,
+          "fullFailed": 1,
+          "failure": "Existing MetadataScrubberTests.testInspectAndScrubImageEXIFAndExtendedAttributes failure at AdditionalToolsTests.swift:115; baseline sandbox JPG UTType resolves dynamic rather than .image."
+        },
+        "shortcutProbe": "Disposable AppKit probe compiled actual VaultGlobalShortcut.swift and registered without reported error. Synthetic Control-Option-V via computer automation produced no callback. Cause is not established; physical/global dispatch remains unverified. Probe closed and absent from app inventory, releasing registration.",
+        "limitations": "No host clipboard writes, Accessibility permission grant, or actual cross-app insertion were exercised. Physical shortcut, manual permission setup, focus restoration, and receiving-editor/image support still require manual checks. Injected paste-service tests do not post host events."
+      },
+      "startupMenuReview": {
+        "report": ".impeccable/review/STARTUP-MENU-REVIEW.md",
+        "disposition": "ship at reviewed scope",
+        "captures": [
+          ".impeccable/review/startup-settings-light.png",
+          ".impeccable/review/startup-settings-dark.png"
+        ],
+        "tests": {
+          "relevantPassed": 20,
+          "fullExecuted": 272,
+          "fullPassed": 271,
+          "knownBaselineFailures": 1
+        },
+        "verifiedActions": [
+          "Demo login toggle changes without host registration.",
+          "Menu visibility enables/disables CPU control while preserving its value.",
+          "Menu enabled alone keeps the app running after window close; Command-comma reopens Settings.",
+          "Closing the window exits when menu and Quick Paste are both disabled."
+        ],
+        "limits": "Actual host login/reboot, direct status-item menu interaction, and minimum-size rendering remain unverified."
+      },
+      "backgroundLaunchReview": {
+        "report": ".impeccable/review/BACKGROUND-LAUNCH-REVIEW.md",
+        "disposition": "ship at reviewed scope",
+        "build": "Release build and strict signature verification passed; real app opened for the user.",
+        "captures": [
+          ".impeccable/review/background-release-settings-light.png",
+          ".impeccable/review/background-release-settings-dark.png"
+        ],
+        "tests": {
+          "focusedPassed": 28,
+          "fullExecuted": 280,
+          "fullPassed": 279,
+          "knownBaselineFailures": 1
+        },
+        "verifiedActions": [
+          "Normal launch shows main window even with menu visibility off.",
+          "Theme changes update the retained window immediately.",
+          "Sidebar Monitor starts readings and Command-comma returns to Settings.",
+          "Background preview creates no main window, enables the menu, and remains available for explicit reopening."
+        ],
+        "limits": "Actual OS logout/login and status-item clicks unverified. Live local bundle reported login-service notFound; registration was not changed, and its availability remains unresolved."
+      },
+      "sensitiveVaultReview": {
+        "report": ".impeccable/review/SENSITIVE-VAULT-REVIEW.md",
+        "disposition": "ship at reviewed scope",
+        "userChoice": "Visual hiding until Reveal; no authentication.",
+        "build": "Release build and strict signing verification passed. Relaunch is needed for the already-running app.",
+        "captures": [
+          ".impeccable/review/sensitive-vault-hidden.png",
+          ".impeccable/review/sensitive-vault-hidden-dark.png",
+          ".impeccable/review/sensitive-vault-revealed-demo.png",
+          ".impeccable/review/sensitive-vault-details.png",
+          ".impeccable/review/sensitive-vault-quick-paste.png"
+        ],
+        "tests": {
+          "focusedPassed": 85,
+          "fullExecuted": 316,
+          "fullPassed": 315,
+          "knownBaselineFailures": 1
+        },
+        "verifiedActions": [
+          "Explicit Reveal shows fictional demo value only in preview.",
+          "Delete confirmation conceals underlying preview and uses safe name.",
+          "Sensitive save removes matching clipboard history and creates masked named vault item.",
+          "Quick Paste uses safe names in visible and accessibility labels.",
+          "Final Details has visible/accessible Name and busy-safe Save."
+        ],
+        "limits": "Visual privacy only; names visible. History exclusion covers loaded values. Other apps may ignore markers or retain content. Clipboard expiry verified through isolated adapters; actual cross-app sensitive paste unverified."
       }
     }
   },
@@ -802,7 +1109,8 @@
       "Duplicate groups with explicit selection and a required retained copy.",
       "Before-and-after rename previews, confirmation, and reviewed latest-batch Undo.",
       "Scoped startup configuration review and local system readings with an optional native menu-bar item.",
-      "Clipboard history that starts paused and remains session-local.",
+      "Clipboard history that starts paused by default, supports explicit launch opt-in, and remains session-local.",
+      "A separate Key Vault for explicitly saved clipboard items, with preview, Copy, and confirmed deletion.",
       "Original-preserving exports, with PDF flattening consequences visible before conversion."
     ],
     "rules": [
@@ -851,7 +1159,7 @@
       "**Don't** promote the provisional name or undecided future tools into new brand commitments.",
       "**Don't** use tile shades as safety or file-type categories, or equate a partial total with complete folder usage.",
       "**Don't** imply startup configuration equals current service state, an unavailable metric equals zero, or PDF compression always saves space.",
-      "**Don't** enable clipboard recording automatically, persist clipboard history, or hide the PDF flattening consequence in help."
+      "**Don't** enable clipboard recording at launch without explicit opt-in, persist session history automatically, imply clearing history deletes Key Vault items, or hide the PDF flattening consequence in help."
     ]
   }
 }

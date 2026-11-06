@@ -1,6 +1,6 @@
 # Mac Tools
 
-A native macOS utility app for storage cleanup, file tasks, startup review, and system activity. Its fifteen tools share a compact SwiftUI interface organized into **Storage**, **Files**, and **System** sections, using Apple frameworks without third-party dependencies.
+A native macOS utility app for storage cleanup, file tasks, startup review, and system activity. Its sixteen tools share a compact SwiftUI interface organized into **Storage**, **Files**, and **System** sections, using Apple frameworks without third-party dependencies.
 
 ## Run the app
 
@@ -39,7 +39,9 @@ To inspect the interface using sample files:
 open -n "build/Mac Tools.app" --args --demo --storage-map
 ```
 
-Demo mode labels sample results and supports scans, filters, previews, and confirmation sheets. Trash, renaming, clipboard recording, and clipboard writes are disabled. File Converter can export its sample files inside its disposable demo folder. The app removes its sample fixtures when it quits normally. Replace `--storage-map` with `--uninstaller`, `--duplicates`, `--startup`, `--monitor`, `--renamer`, `--clipboard`, or `--converter` to open another tool.
+Demo mode labels sample results and supports scans, filters, previews, and confirmation sheets. Trash, renaming, clipboard recording, and clipboard writes are disabled. Key Vault saves and deletes demo items only in memory, without accessing the real vault or Keychain. File Converter can export its sample files inside its disposable demo folder. The app removes its sample fixtures when it quits normally. Replace `--storage-map` with `--uninstaller`, `--duplicates`, `--startup`, `--monitor`, `--renamer`, `--clipboard`, `--key-vault`, or `--converter` to open another tool.
+
+To preview a quiet login launch without changing Login Items, launch with `--demo --background`. Mac Tools starts with its menu-bar item and no main window or Dock icon. Choose **Open Mac Tools** from its menu to show the app.
 
 ## Storage cleaner
 
@@ -102,7 +104,7 @@ This list is scoped to those three locations; it is not a complete list of moder
 
 ## System Monitor
 
-View CPU, active memory, home-volume storage, disk activity, and network activity. Readings update every two seconds while System Monitor is selected or its optional **Menu bar** checkbox is enabled. The menu bar shows CPU usage and opens a compact menu of readings, a refresh action, and controls to reopen or quit Mac Tools. Closing the window keeps the app running only when its menu-bar item is enabled.
+View CPU, active memory, home-volume storage, disk activity, and network activity. Readings update every two seconds while System Monitor is visible in the main window, or while both **Show Mac Tools in menu bar** and **Show CPU usage** are enabled in Settings. The CPU option replaces the app icon with live CPU usage and adds readings and Refresh to the menu. Closing the window keeps the app running when either the menu-bar item or Key Vault quick paste is enabled.
 
 CPU is averaged across all cores. Active memory includes active, wired, and compressed pages, so it differs from Activity Monitor’s Memory Used. Storage shows used and total capacity for the home volume. Disk rates cover available physical storage drivers; network rates sum active Ethernet, Wi-Fi, and cellular interfaces while excluding loopback, bridges, and VPN tunnels. Rates need two readings and restart after a long sampling gap. Unavailable readings remain unavailable rather than being shown as zero. The monitor makes no network requests.
 
@@ -114,9 +116,33 @@ Confirmed renames revalidate the files and use exclusive destination creation. I
 
 ## Clipboard History
 
-Recording starts **off** each time the app launches. Choose **Start** to remember subsequent text and image copies for this session; the existing clipboard is not imported. Search the list, inspect a preview, and choose **Copy** to put the selected item on the clipboard. The app never pastes into another app. **Pause** stops collection, individual removal and **Clear** remove stored history, and quitting clears it. Clearing history does not erase the system clipboard.
+Recording starts **off** by default. Choose **Start** to remember subsequent text and image copies for this session, or enable **Capture clipboard on launch** in Settings for future launches. The existing clipboard is never imported. Search the list, inspect a preview, and choose **Copy** to put the selected item on the clipboard. This Copy action does not paste into another app. **Pause** stops collection, individual removal and **Clear** remove stored history, and quitting clears it. Clearing history does not erase the system clipboard. Start and Pause do not change the launch preference.
 
-History stays in memory with limits of 100 items and 20 MiB. Text over 256 KiB and images over 8 MiB or 16 megapixels are skipped. Accepted images are stored as PNG without metadata. Recognized password-manager, concealed, transient, and autogenerated markers are excluded when the source app supplies them; unmarked sensitive content can still be captured. Recording is an explicit session choice, not a setting silently restored at launch.
+Choose **Save to Key Vault** to keep a selected text or image item across launches. The save sheet offers a name and **Sensitive** option. Only items you explicitly save persist; clearing session history does not remove saved vault items. Saving or marking an item sensitive removes matching values from the current session history. While sensitive vault values are loaded in memory, capture skips matching new copies; unmarked or not-yet-loaded values can still be captured.
+
+History stays in memory with a default limit of 100 items and a 20 MiB total cap. Settings offers limits of 25, 50, 100, 200, or 500 items; lowering the limit immediately removes older entries. Text over 256 KiB and images over 8 MiB or 16 megapixels are skipped. Accepted images are stored as PNG without metadata. Recognized password-manager, concealed, transient, and autogenerated markers are excluded when the source app supplies them; unmarked sensitive content can still be captured.
+
+## Key Vault
+
+Select **Key Vault** in the Files sidebar to find items saved from Clipboard History. Search, select an item, and choose **Copy** to place it on the clipboard. **Details…** lets you change its name and **Sensitive** option. **Delete…** requires confirmation and permanently removes the saved item while leaving the current clipboard and session history unchanged.
+
+Sensitive items show their name, or “Sensitive item” when unnamed, instead of their contents in lists, the quick-paste picker, deletion confirmation, and accessibility labels. Search matches their names only. Choose **Reveal** in the preview to show a sensitive value, then **Hide** to conceal it. Selecting another item, switching tools, leaving the app, or waiting 30 seconds hides it again. Names remain visible. This is visual privacy; revealing, copying, and pasting do not require Touch ID or a password.
+
+Sensitive copies and quick-paste values carry a concealed clipboard marker and clear after 30 seconds if the clipboard still holds that copy. Quitting also clears an unchanged sensitive copy owned by Mac Tools. Other apps may ignore the marker or retain content they have read; this does not erase copies already held elsewhere.
+
+Saved items persist locally across launches in `~/Library/Application Support/MacTools/KeyVault/vault.enc`. The file uses AES-GCM encryption, with its key stored in macOS Keychain; names and sensitivity metadata are encrypted with the content. Existing saved items remain nonsensitive until explicitly marked. Keychain, decryption, and storage failures are reported without falling back to plaintext storage. The vault holds up to 500 items and 20 MiB; reaching a limit refuses new saves until you remove an item. It never automatically evicts saved entries. Names allow up to 200 characters and 800 UTF-8 bytes. Clipboard History’s item-limit preference applies only to session history.
+
+Saving with this version upgrades the encrypted vault format. Existing vaults still open, but earlier Key Vault builds refuse the upgraded file so they cannot silently discard sensitivity settings.
+
+With a text field focused in another app, press **Control–Option–V** to open the temporary Key Vault picker near the pointer. Search, then click an item or use **Up/Down** and **Return** to choose it. **Escape**, clicking outside, or pressing the shortcut again dismisses the picker. **Tools → Quick Paste…** also opens it.
+
+Quick paste requires Mac Tools to be running and Accessibility access. Use **Accessibility Settings…** in Mac Tools Settings or the picker, then enable Mac Tools under **System Settings → Privacy & Security → Accessibility** and invoke the shortcut again from the intended text field. The app does not grant permission itself. The global shortcut registers only that key combination and does not require Input Monitoring.
+
+The picker remembers the original app and text field, puts the chosen item on the clipboard, and sends the native **Command-V** action only if the destination still matches. It never sends Return or submits the field. If permission or focus cannot be verified, a visible error offers **Copy** for manual paste. Ordinary chosen items stay on the clipboard; sensitive copies use the conditional 30-second clearing behavior above. Custom editors may not accept a programmatic paste, and images require a destination that supports image pasting.
+
+**Quick paste (⌃⌥V)** is enabled by default in Settings and keeps Mac Tools running after its main window closes. Quit Mac Tools to stop it, or disable the toggle to release the shortcut. If another app owns the combination, Settings shows the registration error.
+
+Demo mode lets you save and remove sample items in memory, try Sensitive and Reveal with a fictional sensitive item, and preview the picker through **Tools → Quick Paste…**. It never accesses the real vault, Keychain, or system clipboard, never pastes into another app, and does not register the global shortcut.
 
 ## File Converter
 
@@ -152,13 +178,34 @@ Inspect local listening TCP sockets and UDP endpoints, including port number, pr
 
 ## Keyboard and navigation
 
-**Command-1** through **Command-9** select tools in sidebar order across **Storage**, **Files**, and **System** sections. **Command-R** scans or refreshes the selected tool. **Command-Return** opens an available Cleaner, Developer Cleaner, Uninstaller, Duplicate Finder, or Batch Renamer review. Each tool preserves its state when switching.
+**Command-1** through **Command-9** select tools in sidebar order across **Storage**, **Files**, and **System** sections. **Command-R** scans or refreshes the selected tool; it is disabled in Clipboard History and Settings. **Command-Return** opens an available Cleaner, Developer Cleaner, Uninstaller, Duplicate Finder, or Batch Renamer review. **Command-comma** opens Settings. **Control–Option–V** opens the Key Vault quick-paste picker while Mac Tools is running and the shortcut is enabled. Each tool preserves its state when switching.
+
+## Settings
+
+Open **Settings** at the bottom of the sidebar, choose **Mac Tools → Settings…**, or press **Command-comma**. The menu-bar Settings action opens the same page. Preferences save automatically on this Mac.
+
+| Setting | Default | Applies |
+| --- | --- | --- |
+| Theme | System | Immediately; choose System, Light, or Dark |
+| Open at launch | Cleaner | Next launch; shown when the main window opens |
+| Launch at login | Off unless already registered | Registers Mac Tools with macOS for future logins |
+| Show Mac Tools in menu bar | Off | Immediately; keeps the app running when its window closes |
+| Show CPU usage | Off | Immediately while the menu-bar item is enabled |
+| Capture clipboard on launch | Off | Next launch; captures only new copies |
+| History limit | 100 items | Immediately; lowering it removes older entries |
+| Quick paste (⌃⌥V) | On | Immediately; registers the shortcut and keeps the app running when its window closes |
+
+**Launch at login** uses macOS Login Items. Its state reflects the system registration, including changes made in System Settings. If macOS requires approval, Settings shows the pending state and a **Login Items Settings…** action; registration errors remain visible. Turning it off unregisters Mac Tools. At login, the app stays in the background with its menu-bar item enabled, without opening the main window or showing a Dock icon. Choose **Open Mac Tools**, a tool, or **Settings…** from its menu to show the main window. Opening the application yourself shows the window normally. The separate **Open at launch** picker chooses which tool is initially selected.
+
+**Show Mac Tools in menu bar** adds an app icon with access to Mac Tools, Key Vault, Clipboard History, System Monitor, Settings, and Quit, plus recent clipboard items and capture controls. A login or explicit background launch turns this setting on so the app remains accessible. **Show CPU usage** defaults to off and retains an explicit choice while the menu-bar item is hidden. Existing users who enabled the former system-monitor menu item keep it enabled with CPU usage shown.
+
+Session clipboard history remains in memory and clears on quit; items explicitly saved to Key Vault remain until deleted. Demo mode never captures or writes the system clipboard or changes login registration. Its launch-at-login control is a preview held in memory. To preview the page with sample data, launch with `--demo --settings`.
 
 ## Project structure
 
 - `Sources/MacTools/`: app entry point.
 - `Sources/MacTools/UI/`: SwiftUI navigation, views, and presentation state.
-- `Sources/MacTools/Core/`: filesystem operations, guarded Trash, duplicate comparison, rename planning, clipboard storage, conversion, startup inventory, and system sampling.
+- `Sources/MacTools/Core/`: filesystem operations, guarded Trash, duplicate comparison, rename planning, session clipboard storage, encrypted Key Vault persistence, conversion, startup inventory, and system sampling.
 - `Tests/MacToolsTests/`: tests using temporary fixtures.
 - `Resources/Info.plist`: app identity and minimum macOS version.
 - `scripts/`: build, bundle, icon generation, and launch helpers.
