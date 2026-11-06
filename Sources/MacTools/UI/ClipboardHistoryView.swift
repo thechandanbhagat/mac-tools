@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ClipboardHistoryView: View {
     @ObservedObject var model: ClipboardHistoryModel
+    @ObservedObject var vaultModel: KeyVaultModel
+    @State private var itemToSave: ClipboardEntry?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -9,7 +11,7 @@ struct ClipboardHistoryView: View {
                 Text("Clipboard History").font(.system(size: 28, weight: .semibold))
                 if model.isDemo { Text("Demo").font(.system(size: 12)).foregroundStyle(.secondary) }
                 Spacer()
-                HelpTip(text: "Start remembers new text and image copies in this app session only. Nothing is saved to disk. Up to 100 items and 20 MB are kept; text over 256 KB and images over 8 MB or 16 megapixels are skipped. Images keep their pixel dimensions and are stored as PNG without metadata. Password-manager, concealed, and transient items are skipped when the source app marks them. Unmarked sensitive text can still be captured, so pause before copying it. Copy places the selected item on your clipboard; it never pastes into another app.", label: "About clipboard history")
+                HelpTip(text: "Start remembers new text and image copies in session memory. Save to Key Vault keeps chosen items across launches. Up to \(model.history.maximumCount) history items and 20 MB are kept; change the history limit or enable capture on launch in Settings. Text over 256 KB and images over 8 MB or 16 megapixels are skipped. Images keep their pixel dimensions and are stored as PNG without metadata. Password-manager, concealed, and transient items are skipped when the source app marks them. Unmarked sensitive text can still be captured, so pause before copying it. Copy places the selected item on your clipboard; it never pastes into another app.", label: "About clipboard history")
             }
             .padding(.horizontal, 36).padding(.top, 45).padding(.bottom, 24)
             HStack(spacing: 24) {
@@ -56,16 +58,31 @@ struct ClipboardHistoryView: View {
                     Button("Clear") { model.clear() }.buttonStyle(.link)
                 }
                 Spacer()
-                if let notice = model.notice { Text(notice).font(.system(size: 12)).foregroundStyle(.secondary) }
+                if let notice = vaultModel.notice ?? model.notice { Text(notice).font(.system(size: 12)).foregroundStyle(.secondary) }
+                Button("Save to Key Vault") {
+                    itemToSave = model.selectedEntry
+                }.disabled(model.selectedEntry == nil || vaultModel.isBusy).controlSize(.large)
                 Button(model.isMonitoring ? "Pause" : "Start") { model.isMonitoring ? model.pause() : model.start() }
                     .disabled(model.isDemo).controlSize(.large)
-                Button("Copy") { model.copySelected() }.buttonStyle(.borderedProminent).controlSize(.large)
+                Button("Copy") { vaultModel.notice = nil; model.copySelected() }.buttonStyle(.borderedProminent).controlSize(.large)
                     .disabled(model.selectedEntry == nil || model.isDemo)
             }.padding(.horizontal, 36).padding(.vertical, 18).frame(minHeight: 68)
         }.background(Palette.panel)
-            .alert("Clipboard history", isPresented: Binding(get: { model.error != nil }, set: { if !$0 { model.error = nil } })) {
-                Button("OK") { model.error = nil }
-            } message: { Text(model.error ?? "") }
+            .sheet(item: $itemToSave) { item in
+                VaultItemDetailsView(heading: "Save to Key Vault", title: "", isSensitive: false, isBusy: vaultModel.isBusy) { title, sensitive in
+                    guard !vaultModel.isBusy else { return }
+                    model.notice = nil
+                    vaultModel.save(item.content, title: title, isSensitive: sensitive)
+                    itemToSave = nil
+                } onCancel: { itemToSave = nil }
+            }
+            .onChange(of: model.selectedID) { _, _ in vaultModel.notice = nil }
+            .alert(vaultModel.error == nil ? "Clipboard history" : "Key Vault", isPresented: Binding(
+                get: { model.error != nil || vaultModel.error != nil },
+                set: { if !$0 { model.error = nil; vaultModel.error = nil } }
+            )) {
+                Button("OK") { model.error = nil; vaultModel.error = nil }
+            } message: { Text(vaultModel.error ?? model.error ?? "") }
     }
 
     @ViewBuilder private var preview: some View {

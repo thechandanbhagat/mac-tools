@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SystemMonitorView: View {
     @ObservedObject var model: SystemMonitorModel
-    @AppStorage("showSystemMonitorMenuBar") private var showInMenuBar = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -10,7 +9,6 @@ struct SystemMonitorView: View {
                 Text("System Monitor").font(.system(size: 28, weight: .semibold))
                 if model.isDemo { Text("Demo").font(.system(size: 12)).foregroundStyle(.secondary) }
                 Spacer()
-                Toggle("Menu bar", isOn: $showInMenuBar).toggleStyle(.checkbox).font(.system(size: 12))
                 HelpTip(text: Self.help, label: "About system monitor")
             }
             .padding(.horizontal, 36).padding(.top, 45).padding(.bottom, 30)

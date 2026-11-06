@@ -5,7 +5,7 @@ enum AppEnvironment {
     static var isDemo: Bool {
         ProcessInfo.processInfo.arguments.contains("--demo") || Bundle.main.object(forInfoDictionaryKey: "MacToolsDemoMode") as? Bool == true
     }
-    static var initialTool: AppTool {
+    static func initialTool(defaultTool: AppTool = .cleaner) -> AppTool {
         let flags: [(String, AppTool)] = [
             ("--duplicates", .duplicates),
             ("--dev-cleaner", .devCleaner),
@@ -18,13 +18,15 @@ enum AppEnvironment {
             ("--monitor", .monitor),
             ("--renamer", .renamer),
             ("--clipboard", .clipboard),
-            ("--converter", .converter)
+            ("--key-vault", .keyVault),
+            ("--converter", .converter),
+            ("--settings", .settings)
         ]
         if let entry = flags.first(where: { ProcessInfo.processInfo.arguments.contains($0.0) }) { return entry.1 }
         if ProcessInfo.processInfo.arguments.contains("--uninstaller") { return .uninstaller }
         if ProcessInfo.processInfo.arguments.contains("--storage-map") { return .storageMap }
         return (Bundle.main.object(forInfoDictionaryKey: "MacToolsInitialTool") as? String)
-            .flatMap(AppTool.init(rawValue:)) ?? .cleaner
+            .flatMap(AppTool.init(rawValue:)) ?? defaultTool
     }
 }
 
@@ -38,14 +40,14 @@ enum AppToolSection: String, CaseIterable, Identifiable {
     var tools: [AppTool] {
         switch self {
         case .storage: [.cleaner, .storageMap, .largeFiles, .devCleaner, .duplicates, .emptyItems]
-        case .files: [.renamer, .converter, .metadata, .checksums, .clipboard]
+        case .files: [.renamer, .converter, .metadata, .checksums, .clipboard, .keyVault]
         case .system: [.uninstaller, .startup, .ports, .monitor]
         }
     }
 }
 
 enum AppTool: String, CaseIterable, Identifiable {
-    case cleaner, storageMap, largeFiles, devCleaner, duplicates, emptyItems, renamer, converter, metadata, checksums, clipboard, uninstaller, startup, ports, monitor
+    case cleaner, storageMap, largeFiles, devCleaner, duplicates, emptyItems, renamer, converter, metadata, checksums, clipboard, keyVault, uninstaller, startup, ports, monitor, settings
 
     var id: String { rawValue }
 
@@ -62,10 +64,12 @@ enum AppTool: String, CaseIterable, Identifiable {
         case .metadata: "Metadata"
         case .checksums: "Checksums"
         case .clipboard: "Clipboard History"
+        case .keyVault: "Key Vault"
         case .uninstaller: "Uninstaller"
         case .startup: "Startup Manager"
         case .ports: "Active Ports"
         case .monitor: "System Monitor"
+        case .settings: "Settings"
         }
     }
 
@@ -82,10 +86,12 @@ enum AppTool: String, CaseIterable, Identifiable {
         case .metadata: "eye.slash"
         case .checksums: "checkmark.shield"
         case .clipboard: "clipboard"
+        case .keyVault: "lock.rectangle"
         case .uninstaller: "app.badge"
         case .startup: "power"
         case .ports: "network.badge.shield.half.filled"
         case .monitor: "waveform.path.ecg"
+        case .settings: "gearshape"
         }
     }
 }
@@ -103,11 +109,14 @@ struct AppShellView: View {
     @ObservedObject var monitorModel: SystemMonitorModel
     @ObservedObject var renamerModel: BatchRenamerModel
     @ObservedObject var clipboardModel: ClipboardHistoryModel
+    @ObservedObject var vaultModel: KeyVaultModel
     @ObservedObject var converterModel: FileConverterModel
     @ObservedObject var metadataModel: MetadataScrubberModel
     @ObservedObject var checksumModel: ChecksumVerifierModel
+    @ObservedObject var settings: AppSettings
+    @ObservedObject var quickPaste: VaultQuickPasteController
+    @ObservedObject var launchAtLogin: LaunchAtLoginModel
     @Binding var selection: AppTool
-    @State private var showSettings = false
 
     var body: some View {
         HStack(spacing: 0) {
@@ -138,17 +147,20 @@ struct AppShellView: View {
                 case .renamer:
                     BatchRenamerView(model: renamerModel)
                 case .clipboard:
-                    ClipboardHistoryView(model: clipboardModel)
+                    ClipboardHistoryView(model: clipboardModel, vaultModel: vaultModel)
+                case .keyVault:
+                    KeyVaultView(model: vaultModel)
                 case .converter:
                     FileConverterView(model: converterModel)
                 case .metadata:
                     MetadataScrubberView(model: metadataModel)
                 case .checksums:
                     ChecksumVerifierView(model: checksumModel)
+                case .settings:
+                    SettingsView(settings: settings, quickPaste: quickPaste, launchAtLogin: launchAtLogin, isDemo: clipboardModel.isDemo)
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .sheet(isPresented: $showSettings) { SettingsView() }
     }
 
     private var sidebar: some View {
@@ -178,10 +190,8 @@ struct AppShellView: View {
 
             Spacer()
             Divider().padding(.horizontal, 18)
-            Button { showSettings = true } label: {
-                Label("Settings", systemImage: "gearshape")
-                    .font(.system(size: 13)).frame(maxWidth: .infinity, alignment: .leading).padding(10)
-            }.buttonStyle(.plain).padding(10).help("Open Mac Tools settings")
+            sidebarButton(for: .settings)
+                .padding(10).help("Open Mac Tools settings (⌘,)")
         }
         .frame(width: 214)
         .background(Palette.canvas)
@@ -301,7 +311,8 @@ struct AppShellView: View {
         case .ports: portsModel.isRefreshing
         case .monitor: false
         case .renamer: renamerModel.isBusy
-        case .clipboard: false
+        case .clipboard, .settings: false
+        case .keyVault: vaultModel.isBusy
         case .converter: converterModel.isBusy
         case .metadata: metadataModel.isBusy
         case .checksums: checksumModel.isComputing

@@ -44,29 +44,3 @@ struct ReviewView: View {
         }.padding(28).frame(width: 610)
     }
 }
-
-struct SettingsView: View {
-    @Environment(\.dismiss) private var dismiss
-    @AppStorage("appearance") private var appearance = "system"
-    var body: some View {
-        VStack(alignment: .leading, spacing: 22) {
-            HStack {
-                Text("Settings").font(.system(size: 23, weight: .semibold))
-                Spacer()
-                HelpTip(text: "Tools run locally on this Mac. No account, uploads, or analytics. Removal and renaming require confirmation. Conversions save new files. Clipboard history starts off and stays in memory for this session.", label: "About Mac Tools")
-            }
-            Picker("Appearance", selection: $appearance) {
-                Text("System").tag("system")
-                Text("Light").tag("light")
-                Text("Dark").tag("dark")
-            }.pickerStyle(.segmented)
-            Divider()
-            HStack {
-                Text("Mac Tools \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.3.0")")
-                    .font(.system(size: 11)).foregroundStyle(.secondary)
-                Spacer()
-                Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
-            }
-        }.padding(30).frame(width: 470)
-    }
-}
