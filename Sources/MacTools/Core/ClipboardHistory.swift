@@ -3,7 +3,7 @@ import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
-enum ClipboardContent: Equatable, Sendable {
+enum ClipboardContent: Equatable, Codable, Sendable {
     case text(String)
     case image(Data, width: Int, height: Int)
 
@@ -77,7 +77,7 @@ struct ClipboardHistory: Sendable {
     static let maximumItemBytes = 8 * 1024 * 1024
     static let maximumTextBytes = 256 * 1024
     private(set) var entries: [ClipboardEntry] = []
-    let maximumCount: Int
+    private(set) var maximumCount: Int
     let maximumBytes: Int
 
     init(maximumCount: Int = 100, maximumBytes: Int = 20 * 1024 * 1024) {
@@ -85,6 +85,11 @@ struct ClipboardHistory: Sendable {
         self.maximumBytes = max(0, maximumBytes)
     }
     var byteCount: Int { entries.reduce(0) { $0 + $1.content.byteCount } }
+
+    mutating func setMaximumCount(_ count: Int) {
+        maximumCount = max(0, count)
+        if entries.count > maximumCount { entries.removeLast(entries.count - maximumCount) }
+    }
 
     mutating func insert(_ content: ClipboardContent, at date: Date = .now) {
         guard maximumCount > 0, content.byteCount > 0,

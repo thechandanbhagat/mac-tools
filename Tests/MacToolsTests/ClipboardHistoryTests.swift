@@ -67,6 +67,83 @@ final class ClipboardHistoryTests: XCTestCase {
         await model.captureChange()
         XCTAssertEqual(model.history.entries.first?.content, .text("new copy"))
     }
+    func testLaunchCaptureStartsOnceAndIgnoresExistingClipboard() async {
+        let access = FakeClipboardAccess()
+        access.next = .init(types: [], text: "existing", imageData: nil)
+        let model = ClipboardHistoryModel(isDemo: false, access: access, captureOnLaunch: true)
+        defer { model.shutdown() }
+        XCTAssertTrue(model.isMonitoring)
+        XCTAssertEqual(access.readCount, 0)
+        await model.captureChange()
+        XCTAssertTrue(model.history.entries.isEmpty)
+        XCTAssertEqual(access.readCount, 0)
+
+        access.count += 1
+        access.next = .init(types: [], text: "new copy", imageData: nil)
+        await model.captureChange()
+        XCTAssertEqual(model.history.entries.map(\.content), [.text("new copy")])
+
+        model.pause()
+        model.setHistoryLimit(50)
+        model.refresh()
+        access.count += 1
+        access.next = .init(types: [], text: "after pause", imageData: nil)
+        let reads = access.readCount
+        let countReads = access.countReads
+        await model.captureChange()
+        XCTAssertFalse(model.isMonitoring)
+        XCTAssertEqual(access.readCount, reads)
+        XCTAssertEqual(access.countReads, countReads)
+        XCTAssertEqual(model.history.entries.map(\.content), [.text("new copy")])
+    }
+    func testDisabledLaunchCaptureDoesNotInspectClipboard() async {
+        let access = FakeClipboardAccess()
+        let model = ClipboardHistoryModel(isDemo: false, access: access, captureOnLaunch: false, historyLimit: 50)
+        defer { model.shutdown() }
+        model.setHistoryLimit(25)
+        await model.captureChange()
+        XCTAssertFalse(model.isMonitoring)
+        XCTAssertEqual(access.countReads, 0)
+        XCTAssertEqual(access.readCount, 0)
+        XCTAssertEqual(model.history.maximumCount, 25)
+    }
+    func testHistoryLimitRetainsNewestCopiesAndUpdatesSelectionWithoutPausing() async {
+        let access = FakeClipboardAccess()
+        let model = ClipboardHistoryModel(isDemo: false, access: access, captureOnLaunch: true, historyLimit: 3)
+        defer { model.shutdown() }
+        for text in ["one", "two", "three", "four"] {
+            access.count += 1
+            access.next = .init(types: [], text: text, imageData: nil)
+            await model.captureChange()
+        }
+        XCTAssertEqual(model.history.entries.map(\.content), [.text("four"), .text("three"), .text("two")])
+        model.selectedID = model.history.entries.last?.id
+        let countReads = access.countReads
+        model.setHistoryLimit(2)
+        XCTAssertTrue(model.isMonitoring)
+        XCTAssertEqual(access.countReads, countReads)
+        XCTAssertEqual(model.history.entries.map(\.content), [.text("four"), .text("three")])
+        XCTAssertEqual(model.selectedEntry?.content, .text("four"))
+
+        access.count += 1
+        access.next = .init(types: [], text: "five", imageData: nil)
+        await model.captureChange()
+        XCTAssertEqual(model.history.entries.map(\.content), [.text("five"), .text("four")])
+        XCTAssertEqual(model.selectedEntry?.content, .text("four"))
+    }
+    func testHistoryLimitIsClampedToSupportedBounds() {
+        let access = FakeClipboardAccess()
+        let model = ClipboardHistoryModel(isDemo: false, access: access, historyLimit: 0)
+        defer { model.shutdown() }
+        XCTAssertEqual(model.history.maximumCount, 1)
+        model.setHistoryLimit(1000)
+        XCTAssertEqual(model.history.maximumCount, 500)
+        model.setHistoryLimit(-1)
+        XCTAssertEqual(model.history.maximumCount, 1)
+        XCTAssertEqual(model.history.maximumBytes, 20 * 1024 * 1024)
+        XCTAssertEqual(access.countReads, 0)
+        XCTAssertEqual(access.readCount, 0)
+    }
     func testClipboardReplacementDuringReadCannotBypassConcealedTypes() async {
         let access = FakeClipboardAccess()
         let model = ClipboardHistoryModel(isDemo: false, access: access)
@@ -103,6 +180,91 @@ final class ClipboardHistoryTests: XCTestCase {
         model.clear(); XCTAssertTrue(model.history.entries.isEmpty)
         model.shutdown(); XCTAssertEqual(access.writes, [])
     }
+    func testSensitiveContentsScrubMatchingHistoryAndRepairSelectionWithoutChangingCaptureState() async throws {
+        let access = FakeClipboardAccess()
+        let model = ClipboardHistoryModel(isDemo: false, access: access)
+        defer { model.shutdown() }
+        model.start()
+        for text in ["private sample", "ordinary copy"] {
+            access.count += 1
+            access.next = .init(types: [], text: text, imageData: nil)
+            await model.captureChange()
+        }
+        model.selectedID = try XCTUnwrap(model.history.entries.first { $0.content == .text("private sample") }).id
+        let countReads = access.countReads
+        let payloadReads = access.readCount
+
+        model.setSensitiveContents([.text("private sample")])
+
+        XCTAssertEqual(model.history.entries.map(\.content), [.text("ordinary copy")])
+        XCTAssertEqual(model.selectedEntry?.content, .text("ordinary copy"))
+        XCTAssertTrue(model.isMonitoring)
+        XCTAssertEqual(access.countReads, countReads)
+        XCTAssertEqual(access.readCount, payloadReads)
+        XCTAssertTrue(access.writes.isEmpty)
+
+        model.pause()
+        model.setSensitiveContents([.text("private sample"), .text("ordinary copy")])
+        XCTAssertTrue(model.history.entries.isEmpty)
+        XCTAssertNil(model.selectedID)
+        XCTAssertFalse(model.isMonitoring)
+    }
+    func testSensitiveContentCopiesAreExcludedWhileUnrelatedCopiesStillCapture() async {
+        let access = FakeClipboardAccess()
+        let model = ClipboardHistoryModel(isDemo: false, access: access)
+        defer { model.shutdown() }
+        model.setSensitiveContents([.text("private sample")])
+        model.start()
+        for text in ["private sample", "ordinary copy", "private sample"] {
+            access.count += 1
+            access.next = .init(types: [], text: text, imageData: nil)
+            await model.captureChange()
+        }
+
+        XCTAssertEqual(model.history.entries.map(\.content), [.text("ordinary copy")])
+        XCTAssertTrue(model.isMonitoring)
+
+        model.setSensitiveContents([])
+        access.count += 1
+        access.next = .init(types: [], text: "private sample", imageData: nil)
+        await model.captureChange()
+        XCTAssertEqual(model.history.entries.map(\.content), [.text("private sample"), .text("ordinary copy")])
+    }
+    func testSensitivityAppliedDuringReadPreventsPendingCapturePublication() async {
+        let access = FakeClipboardAccess()
+        let model = ClipboardHistoryModel(isDemo: false, access: access)
+        defer { model.shutdown() }
+        model.start()
+        access.count += 1
+        access.next = .init(types: [], text: "private sample", imageData: nil)
+        access.onRead = {
+            model.setSensitiveContents([.text("private sample")])
+            access.onRead = nil
+        }
+
+        await model.captureChange()
+
+        XCTAssertTrue(model.history.entries.isEmpty)
+        XCTAssertNil(model.selectedID)
+        XCTAssertTrue(access.writes.isEmpty)
+    }
+    func testStaleHistoryActionCannotCopyNewlySensitiveContent() async throws {
+        let access = FakeClipboardAccess()
+        let model = ClipboardHistoryModel(isDemo: false, access: access)
+        defer { model.shutdown() }
+        model.start()
+        access.count += 1
+        access.next = .init(types: [], text: "private sample", imageData: nil)
+        await model.captureChange()
+        let entry = try XCTUnwrap(model.selectedEntry)
+        model.setSensitiveContents([entry.content])
+
+        model.copy(entry)
+
+        XCTAssertTrue(access.writes.isEmpty)
+        XCTAssertNotNil(model.error)
+        XCTAssertTrue(model.history.entries.isEmpty)
+    }
     func testCopyRequiresExplicitActionAndDoesNotRecaptureOwnWrite() async {
         let access = FakeClipboardAccess()
         let model = ClipboardHistoryModel(isDemo: false, access: access)
@@ -118,8 +280,12 @@ final class ClipboardHistoryTests: XCTestCase {
     }
     func testDemoCannotReadOrWriteHostClipboard() async {
         let access = FakeClipboardAccess()
-        let model = ClipboardHistoryModel(isDemo: true, access: access)
+        let model = ClipboardHistoryModel(isDemo: true, access: access, captureOnLaunch: true, historyLimit: 2)
         XCTAssertFalse(model.history.entries.isEmpty)
+        XCTAssertEqual(model.history.entries.count, 2)
+        XCTAssertFalse(model.isMonitoring)
+        model.setHistoryLimit(1)
+        XCTAssertEqual(model.history.entries.count, 1)
         model.start(); await model.captureChange(); model.copySelected(); model.clear(); model.shutdown()
         XCTAssertEqual(access.readCount, 0); XCTAssertEqual(access.countReads, 0); XCTAssertEqual(access.writes.count, 0)
     }

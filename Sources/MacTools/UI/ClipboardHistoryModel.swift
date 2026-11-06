@@ -6,13 +6,62 @@ protocol ClipboardAccess: AnyObject {
     var changeCount: Int { get }
     func candidate() -> ClipboardCandidate?
     func write(_ content: ClipboardContent) -> Bool
+    func writeSensitive(_ content: ClipboardContent) -> Bool
+    func clearSensitive()
+}
+
+extension ClipboardAccess {
+    // A provider must explicitly support concealed writes; never downgrade a secret.
+    func writeSensitive(_ content: ClipboardContent) -> Bool { false }
+    func clearSensitive() {}
+}
+
+/// An injectable boundary keeps clipboard policy tests independent of the host daemon.
+@MainActor
+protocol ClipboardPasteboard: AnyObject {
+    var changeCount: Int { get }
+    var types: [NSPasteboard.PasteboardType]? { get }
+    func data(forType type: NSPasteboard.PasteboardType) -> Data?
+    func string(forType type: NSPasteboard.PasteboardType) -> String?
+    @discardableResult func clearContents() -> Int
+    func setString(_ string: String, forType type: NSPasteboard.PasteboardType) -> Bool
+    func setData(_ data: Data?, forType type: NSPasteboard.PasteboardType) -> Bool
+    func writeItem(_ item: NSPasteboardItem) -> Bool
+}
+
+@MainActor
+private final class SystemClipboardPasteboard: ClipboardPasteboard {
+    private let pasteboard = NSPasteboard.general
+    var changeCount: Int { pasteboard.changeCount }
+    var types: [NSPasteboard.PasteboardType]? { pasteboard.types }
+    func data(forType type: NSPasteboard.PasteboardType) -> Data? { pasteboard.data(forType: type) }
+    func string(forType type: NSPasteboard.PasteboardType) -> String? { pasteboard.string(forType: type) }
+    @discardableResult func clearContents() -> Int { pasteboard.clearContents() }
+    func setString(_ string: String, forType type: NSPasteboard.PasteboardType) -> Bool {
+        pasteboard.setString(string, forType: type)
+    }
+    func setData(_ data: Data?, forType type: NSPasteboard.PasteboardType) -> Bool {
+        pasteboard.setData(data, forType: type)
+    }
+    func writeItem(_ item: NSPasteboardItem) -> Bool { pasteboard.writeObjects([item]) }
 }
 
 @MainActor
 final class SystemClipboardAccess: ClipboardAccess {
-    var changeCount: Int { NSPasteboard.general.changeCount }
+    static let concealedType = NSPasteboard.PasteboardType("org.nspasteboard.ConcealedType")
+    private static let ownershipType = NSPasteboard.PasteboardType("com.chandan.mac-tools.sensitive-token")
+    private let pasteboard: any ClipboardPasteboard
+    private let sensitiveLifetime: Duration
+    private var sensitiveLease: SensitiveClipboardLease?
+    private var sensitiveCleanup: Task<Void, Never>?
+
+    init(pasteboard: (any ClipboardPasteboard)? = nil, sensitiveLifetime: Duration = .seconds(30)) {
+        self.pasteboard = pasteboard ?? SystemClipboardPasteboard()
+        self.sensitiveLifetime = sensitiveLifetime
+    }
+
+    var changeCount: Int { pasteboard.changeCount }
     func candidate() -> ClipboardCandidate? {
-        let pasteboard = NSPasteboard.general
         let types = (pasteboard.types ?? []).map(\.rawValue)
         guard !ClipboardCandidate.excludes(types: types) else { return nil }
         // Never ask providers to materialize file promises, URLs, or arbitrary types.
@@ -22,18 +71,81 @@ final class SystemClipboardAccess: ClipboardAccess {
         return ClipboardCandidate(types: types, text: pasteboard.string(forType: .string), imageData: nil)
     }
     func write(_ content: ClipboardContent) -> Bool {
-        let pasteboard = NSPasteboard.general
+        cancelSensitiveCleanup()
         pasteboard.clearContents()
         switch content {
         case .text(let text): return pasteboard.setString(text, forType: .string)
         case .image(let data, _, _): return pasteboard.setData(data, forType: .png)
         }
     }
+
+    func writeSensitive(_ content: ClipboardContent) -> Bool {
+        let item = NSPasteboardItem()
+        let payloadSet: Bool
+        switch content {
+        case .text(let text): payloadSet = item.setString(text, forType: .string)
+        case .image(let data, _, _): payloadSet = item.setData(data, forType: .png)
+        }
+        let token = UUID().uuidString
+        guard payloadSet,
+              item.setData(Data(), forType: Self.concealedType),
+              item.setString(token, forType: Self.ownershipType) else { return false }
+
+        cancelSensitiveCleanup()
+        pasteboard.clearContents()
+        // The payload and privacy marker become readable together. Clipboard capture
+        // can never observe a generation containing an unmarked secret from this write.
+        let written = pasteboard.writeItem(item)
+        let lease = SensitiveClipboardLease(pasteboard: pasteboard, changeCount: pasteboard.changeCount,
+                                           token: token, ownershipType: Self.ownershipType)
+        guard written else {
+            // A provider that partially committed before reporting failure must
+            // not leave our secret behind without a scheduled expiry.
+            lease.clearIfOwned()
+            return false
+        }
+        sensitiveLease = lease
+        let lifetime = sensitiveLifetime
+        // Capture no payload or writer. The scheduled expiry remains alive even if a
+        // temporary caller releases this ClipboardAccess immediately after writing.
+        sensitiveCleanup = Task { @MainActor in
+            do { try await Task.sleep(for: lifetime) } catch { return }
+            guard !Task.isCancelled else { return }
+            lease.clearIfOwned()
+        }
+        return true
+    }
+
+    func clearSensitive() {
+        sensitiveLease?.clearIfOwned()
+        cancelSensitiveCleanup()
+    }
+
+    private func cancelSensitiveCleanup() {
+        sensitiveCleanup?.cancel()
+        sensitiveCleanup = nil
+        sensitiveLease = nil
+    }
+}
+
+@MainActor
+private struct SensitiveClipboardLease {
+    let pasteboard: any ClipboardPasteboard
+    let changeCount: Int
+    let token: String
+    let ownershipType: NSPasteboard.PasteboardType
+
+    func clearIfOwned() {
+        guard pasteboard.changeCount == changeCount,
+              pasteboard.types?.contains(SystemClipboardAccess.concealedType) == true,
+              pasteboard.string(forType: ownershipType) == token else { return }
+        pasteboard.clearContents()
+    }
 }
 
 @MainActor
 final class ClipboardHistoryModel: ObservableObject {
-    @Published private(set) var history = ClipboardHistory()
+    @Published private(set) var history: ClipboardHistory
     @Published private(set) var isMonitoring = false
     @Published var query = ""
     @Published var selectedID: UUID?
@@ -44,10 +156,13 @@ final class ClipboardHistoryModel: ObservableObject {
     private var task: Task<Void, Never>?
     private var generation = UUID()
     private var lastChangeCount = 0
+    private var sensitiveContents: [ClipboardContent] = []
 
-    init(isDemo: Bool = AppEnvironment.isDemo, access: (any ClipboardAccess)? = nil) {
+    init(isDemo: Bool = AppEnvironment.isDemo, access: (any ClipboardAccess)? = nil,
+         captureOnLaunch: Bool = false, historyLimit: Int = 100) {
         self.isDemo = isDemo
         self.access = access ?? SystemClipboardAccess()
+        self.history = ClipboardHistory(maximumCount: min(500, max(1, historyLimit)))
         if isDemo {
             if let image = Self.demoImage() { history.insert(image) }
             history.insert(.text("A quiet workspace, ready for the next idea."))
@@ -55,6 +170,7 @@ final class ClipboardHistoryModel: ObservableObject {
             history.insert(.text("Project notes\nReview the new layout and prepare the final images."))
             selectedID = history.entries.first?.id
         }
+        if captureOnLaunch, !isDemo { start() }
     }
     var isBusy: Bool { false }
     var entries: [ClipboardEntry] {
@@ -93,7 +209,8 @@ final class ClipboardHistoryModel: ObservableObject {
         // generation so a newly concealed item cannot inherit the previous item's types.
         guard let candidate = access.candidate(), access.changeCount == count else { return }
         let content = await Task.detached(priority: .utility) { candidate.sanitized() }.value
-        guard generation == expected, isMonitoring, let content else { return }
+        guard generation == expected, isMonitoring, let content,
+              !sensitiveContents.contains(content) else { return }
         history.insert(content)
         if selectedID == nil { selectedID = history.entries.first?.id }
         if !history.entries.contains(where: { $0.id == selectedID }) { selectedID = history.entries.first?.id }
@@ -104,6 +221,12 @@ final class ClipboardHistoryModel: ObservableObject {
     }
     func copy(_ item: ClipboardEntry) {
         guard !isDemo else { return }
+        // A menu action may still hold an entry removed by a just-completed
+        // sensitivity change. Require the vault's protected copy path instead.
+        guard !sensitiveContents.contains(item.content) else {
+            error = "This item is protected in Key Vault. Copy it from there."
+            return
+        }
         if access.write(item.content) {
             lastChangeCount = access.changeCount
             notice = "Copied."
@@ -124,8 +247,27 @@ final class ClipboardHistoryModel: ObservableObject {
         notice = nil
         if resume { start() }
     }
-    func refresh() {} // Clipboard is event-polled only after explicit Start.
-    func shutdown() { pause(); history.clear(); selectedID = nil }
+    func setHistoryLimit(_ count: Int) {
+        // A capture still being decoded inserts against the latest limit, so this
+        // does not need to restart monitoring or discard the next clipboard change.
+        history.setMaximumCount(min(500, max(1, count)))
+        if !history.entries.contains(where: { $0.id == selectedID }) {
+            selectedID = entries.first?.id
+        }
+    }
+    func setSensitiveContents(_ contents: [ClipboardContent]) {
+        sensitiveContents = contents
+        let removedIDs = history.entries.filter { contents.contains($0.content) }.map(\.id)
+        guard !removedIDs.isEmpty else { return }
+        var updated = history
+        for id in removedIDs { updated.remove(id: id) }
+        history = updated
+        if !history.entries.contains(where: { $0.id == selectedID }) {
+            selectedID = entries.first?.id
+        }
+    }
+    func refresh() {} // Clipboard is event-polled only while capture is enabled.
+    func shutdown() { pause(); history.clear(); sensitiveContents = []; selectedID = nil }
 
     private static func demoImage() -> ClipboardContent? {
         guard let context = CGContext(data: nil, width: 800, height: 500, bitsPerComponent: 8, bytesPerRow: 0,
